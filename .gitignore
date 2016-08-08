@@ -1,0 +1,6 @@
+lib
+out
+/.idea
+web/resources
+web/WEB-INF/lib
+jsftraining.iml
