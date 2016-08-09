@@ -5,6 +5,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -63,7 +64,7 @@ public class UserDAO {
 
                 User currentUser = new User(id,firstName,lastName,email);
 
-                // add it to the list of students
+                // add it to the list of users
                 users.add(currentUser);
             }
 
@@ -71,6 +72,120 @@ public class UserDAO {
         }
         finally {
             _close (connection, statement, resultSet);
+        }
+    }
+
+    public void addUser(User user) throws Exception {
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+
+        try {
+            // get a connection from the connection pool
+            connection = _getConnection();
+
+            // prepared sql statement
+            String sql = "insert into users (first_name, last_name, email) values (?, ?, ?)";
+            statement = connection.prepareStatement(sql);
+
+            // set params
+            statement.setString(1, user.getFirstName());
+            statement.setString(2, user.getLastName());
+            statement.setString(3, user.getEmail());
+
+            statement.execute();
+        }
+        finally {
+            // clean up
+            _close(connection,statement,null);
+        }
+    }
+
+    public User getUser(int userId) throws Exception{
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+
+        try {
+            connection = _getConnection();
+
+            String sql = "select * from users where id=?";
+
+            statement = connection.prepareStatement(sql);
+
+            // set params
+            statement.setInt(1, userId);
+
+            resultSet = statement.executeQuery();
+
+            User fetchedUser = null;
+
+            // retrieve data from result set row
+            if (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String firstName = resultSet.getString("first_name");
+                String lastName = resultSet.getString("last_name");
+                String email = resultSet.getString("email");
+
+                fetchedUser = new User(id, firstName, lastName,
+                        email);
+            }
+            else {
+                throw new Exception("Unable to find user with id: " + userId);
+            }
+
+            return fetchedUser;
+        }
+        finally {
+            _close(connection, statement, resultSet);
+        }
+    }
+
+    public void updateUser(User user) throws Exception{
+        Connection connection = null;
+        PreparedStatement statement = null;
+
+        try {
+            connection = _getConnection();
+
+            String sql = "update user "
+                    + " set first_name=?, last_name=?, email=?"
+                    + " where id=?";
+
+            statement = connection.prepareStatement(sql);
+
+            // set params
+            statement.setString(1, user.getFirstName());
+            statement.setString(2, user.getLastName());
+            statement.setString(3, user.getEmail());
+            statement.setInt(4, user.getId());
+
+            statement.execute();
+        }
+        finally {
+            _close(connection, statement,null);
+        }
+    }
+
+    public void deleteUser(int userId) throws Exception {
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+
+        try {
+            connection = _getConnection();
+
+            String sql = "delete from users where id=?";
+
+            statement = connection.prepareStatement(sql);
+
+            // set params
+            statement.setInt(1, userId);
+
+            statement.execute();
+        }
+        finally {
+            _close(connection, statement,null);
         }
     }
 

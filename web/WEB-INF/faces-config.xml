@@ -4,4 +4,11 @@
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
     http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd">
   
+    <application>
+        <resource-bundle>
+            <!-- definie Resource Bundle to access properties File -->
+            <base-name>com.github.beisser.messages</base-name>
+            <var>messages</var>
+        </resource-bundle>
+    </application>
 </faces-config>

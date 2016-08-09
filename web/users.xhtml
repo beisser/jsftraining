@@ -20,23 +20,28 @@
 
         <h:button value="Add User" styleClass="btn btn-default" outcome="addUserForm"></h:button>
 
-        <h:dataTable value="#{userController.users}" var="user" styleClass="table table-striped">
-            <h:column>
-                <f:facet name="header">First Name</f:facet>
-                #{user.firstName}
-            </h:column>
-            <h:column>
-                <f:facet name="header">Last Name</f:facet>
-                #{user.lastName}
-            </h:column>
-            <h:column>
-                <f:facet name="header">Email</f:facet>
-                #{user.email}
-            </h:column>
-            <h:column>
-
-            </h:column>
-        </h:dataTable>
+        <h:form>
+            <h:dataTable value="#{userController.users}" var="user" styleClass="table table-striped">
+                <h:column>
+                    <f:facet name="header">First Name</f:facet>
+                    #{user.firstName}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Last Name</f:facet>
+                    #{user.lastName}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Email</f:facet>
+                    #{user.email}
+                </h:column>
+                <h:column>
+                    <h:commandLink value="Update" action="#{userController.loadUser(user.id)}"></h:commandLink>
+                    <h:commandLink value="Delete"
+                                   onclick="if (!confirm('Delete User?')) return false"
+                                   action="#{userController.deleteUser(user.id)}"/>
+                </h:column>
+            </h:dataTable>
+        </h:form>
     </div>
 </h:body>
 </html>

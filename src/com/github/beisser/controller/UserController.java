@@ -6,8 +6,11 @@ import com.github.beisser.util.AppUtils;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -39,6 +42,50 @@ public class UserController {
             // send FacesMessage to next page to display errors
             AppUtils.addErrorMessage(exc);
         }
+    }
+
+    public String addUser(User user) {
+        try {
+            userDAO.addUser(user);
+        } catch(Exception e) {
+            AppUtils.addErrorMessage(e);
+        }
+        return "users";
+    }
+
+    // fetches the object, adding it to the request map, send it to updateUserForm
+    public String loadUser(int id) {
+        try {
+            User fetchedUser = userDAO.getUser(id);
+
+            // helper to add data to memory
+            ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
+
+            // add data to request
+            Map<String, Object> requestMap = externalContext.getRequestMap();
+            requestMap.put("user", fetchedUser);
+        } catch(Exception e) {
+            AppUtils.addErrorMessage(e);
+        }
+        return "updateUserForm";
+    }
+
+    public String updateUser(User user) {
+        try {
+            userDAO.updateUser(user);
+        } catch(Exception e) {
+            AppUtils.addErrorMessage(e);
+        }
+        return "users";
+    }
+
+    public String deleteUser(int id) {
+        try {
+            userDAO.deleteUser(id);
+        } catch(Exception e) {
+            AppUtils.addErrorMessage(e);
+        }
+        return "users";
     }
 
     public List<User> getUsers() {

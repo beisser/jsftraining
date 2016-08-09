@@ -9,9 +9,17 @@
     <title>User Management</title>
 </h:head>
 <h:body>
-    <h:outputText value="Home"></h:outputText>
-    <h:form>
-        <h:commandButton value="Manage Users" action="users"></h:commandButton>
-    </h:form>
+
+    <ui:composition template="WEB-INF/templates/layout.xhtml">
+        <ui:define name="content">
+            <div class="jumbotron">
+                <h2>JSF HOME</h2>
+                <h:form>
+                    <h:commandButton value="Manage Users" action="users" styleClass="btn btn-default"></h:commandButton>
+                </h:form>
+            </div>
+        </ui:define>
+    </ui:composition>
+
 </h:body>
 </html>
