@@ -1,47 +1,55 @@
-<!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+<html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
       xmlns:f="http://xmlns.jcp.org/jsf/core">
+<f:view contracts="#{contract.contract}">
+    <ui:composition template="/template.xhtml">
 
-<f:metadata>
-    <f:event type="preRenderView" listener="#{userController.loadUsers()}"/>
-</f:metadata>
+        <ui:define name="metadata">
+            <f:metadata>
+                <f:event type="preRenderView" listener="#{userController.loadUsers()}"/>
+            </f:metadata>
+        </ui:define>
 
-<h:head>
-    <title>User Management</title>
-    <h:outputStylesheet library="bootstrap" name="css/bootstrap.min.css"></h:outputStylesheet>
-</h:head>
+        <ui:define name="js">
+            <h:outputScript library="js" name="users/users.js"></h:outputScript>
+        </ui:define>
 
-<h:body>
-    <div class="container">
-        <h3>User Management</h3>
+        <ui:define name="title">User Management</ui:define>
 
-        <h:messages />
+        <ui:define name="header">
+            <h3>User Management</h3>
+            <hr></hr>
+        </ui:define>
 
-        <h:button value="Add User" styleClass="btn btn-default" outcome="addUserForm"></h:button>
+        <ui:define name="content">
+            <h:messages />
 
-        <h:form>
-            <h:dataTable value="#{userController.users}" var="user" styleClass="table table-striped">
-                <h:column>
-                    <f:facet name="header">First Name</f:facet>
-                    #{user.firstName}
-                </h:column>
-                <h:column>
-                    <f:facet name="header">Last Name</f:facet>
-                    #{user.lastName}
-                </h:column>
-                <h:column>
-                    <f:facet name="header">Email</f:facet>
-                    #{user.email}
-                </h:column>
-                <h:column>
-                    <h:commandLink value="Update" action="#{userController.loadUser(user.id)}"></h:commandLink>
-                    <h:commandLink value="Delete"
-                                   onclick="if (!confirm('Delete User?')) return false"
-                                   action="#{userController.deleteUser(user.id)}"/>
-                </h:column>
-            </h:dataTable>
-        </h:form>
-    </div>
-</h:body>
+            <h:button value="Add User" styleClass="btn btn-default" outcome="addUserForm"></h:button>
+
+            <h:form>
+                <h:dataTable value="#{userController.users}" var="user" styleClass="table table-striped">
+                    <h:column>
+                        <f:facet name="header">First Name</f:facet>
+                        #{user.firstName}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Last Name</f:facet>
+                        #{user.lastName}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Email</f:facet>
+                        #{user.email}
+                    </h:column>
+                    <h:column>
+                        <h:commandLink value="Update" action="#{userController.loadUser(user.id)}"></h:commandLink>
+                        <h:commandLink value="Delete"
+                                       id="delete_user"
+                                       action="#{userController.deleteUser(user.id)}"/>
+                    </h:column>
+                </h:dataTable>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</f:view>
 </html>

@@ -1,6 +1,6 @@
 lib
 out
 /.idea
-web/resources
+web/resources/bootstrap
 web/WEB-INF/lib
 jsftraining.iml

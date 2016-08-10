@@ -5,39 +5,42 @@
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
       xmlns:f="http://xmlns.jcp.org/jsf/core">
-<h:head>
-    <title>Add a user</title>
-    <h:outputStylesheet library="bootstrap" name="css/bootstrap.min.css"></h:outputStylesheet>
-</h:head>
-<h:body>
-    <div class="container">
-        <h3>Add a User</h3>
+<f:view contracts="#{contract.contract}">
+    <ui:composition template="/template.xhtml">
 
-        <h:messages></h:messages>
+        <ui:define name="header">
+            <h3>Add a User</h3>
+            <hr></hr>
+        </ui:define>
 
-        <h:form id="userForm">
-            <h:panelGrid columns="3">
-                <h:outputLabel for="firstName">#{messages["user.label.username"]}</h:outputLabel>
-                <h:inputText id="firstName" styleClass="form-control" value="#{user.firstName}" required="true" requiredMessage="First name can not be empty"></h:inputText>
-                <h:message for="firstName"></h:message>
+        <ui:define name="content">
+            <!--<h:messages></h:messages>-->
 
-                <h:outputLabel for="lastName">Last Name</h:outputLabel>
-                <h:inputText id="lastName" styleClass="form-control" value="#{user.lastName}">
-                    <f:converter converterId="com.github.beisser.converter.ToUpperConverter"></f:converter>
-                    <f:validator validatorId="com.github.beisser.validator.LowerCaseValidator"></f:validator>
-                </h:inputText>
-                <h:message for="lastName"></h:message>
+            <h:form id="userForm">
+                <h:panelGrid columns="3">
+                    <h:outputLabel for="firstName">#{messages["user.label.username"]}</h:outputLabel>
+                    <h:inputText id="firstName" styleClass="form-control" value="#{user.firstName}" required="true"
+                                 requiredMessage="First name can not be empty"></h:inputText>
+                    <h:message for="firstName"></h:message>
 
-                <h:outputLabel for="email">Email</h:outputLabel>
-                <h:inputText id="email" styleClass="form-control" value="#{user.email}"></h:inputText>
-                <h:message for="email"></h:message>
+                    <h:outputLabel for="lastName">Last Name</h:outputLabel>
+                    <h:inputText id="lastName" styleClass="form-control" value="#{user.lastName}">
+                        <f:converter converterId="com.github.beisser.converter.ToUpperConverter"></f:converter>
+                        <f:validator validatorId="com.github.beisser.validator.LowerCaseValidator"></f:validator>
+                    </h:inputText>
+                    <h:message for="lastName"></h:message>
 
-                <h:commandButton value="Save User" styleClass="btn btn-default" action="#{userController.addUser(user)}"></h:commandButton>
-            </h:panelGrid>
-        </h:form>
+                    <h:outputLabel for="email">Email</h:outputLabel>
+                    <h:inputText id="email" styleClass="form-control" value="#{user.email}"></h:inputText>
+                    <h:message for="email"></h:message>
 
-        <h:outputLink value="users.xhtml">Back to list</h:outputLink>
-    </div>
-
-</h:body>
+                    <h:commandButton value="Save User" styleClass="btn btn-default"
+                                     action="#{userController.addUser(user)}"></h:commandButton>
+                    <h:commandButton value="Cancel" styleClass="btn btn-default" immediate="true"
+                                     action="#{navigationController.processUsers()}"></h:commandButton>
+                </h:panelGrid>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</f:view>
 </html>

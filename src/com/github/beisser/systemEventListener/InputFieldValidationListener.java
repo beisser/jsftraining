@@ -18,9 +18,9 @@ public class InputFieldValidationListener implements SystemEventListener {
 
         if (input instanceof EditableValueHolder) {
             if (!input.isValid()) {
-                input.getAttributes().put("style","background:red");
+                input.getAttributes().put("style","border-color:red");
             } else {
-                input.getAttributes().put("style","background:green");
+                input.getAttributes().put("style","border-color:#ccc");
             }
         }
     }
