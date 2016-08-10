@@ -4,11 +4,11 @@
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
     http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd">
 
-    <lifecycle>
-        <phase-listener>
-            com.github.beisser.phaseListener.AuthPhaseListener
-        </phase-listener>
-    </lifecycle>
+    <!--<lifecycle>-->
+        <!--<phase-listener>-->
+            <!--com.github.beisser.phaseListener.AuthPhaseListener-->
+        <!--</phase-listener>-->
+    <!--</lifecycle>-->
 
     <application>
         <resource-bundle>
@@ -16,6 +16,21 @@
             <base-name>com.github.beisser.messages</base-name>
             <var>messages</var>
         </resource-bundle>
+        <system-event-listener>
+            <source-class>
+                javax.faces.component.html.HtmlInputText
+            </source-class>
+            <system-event-class>javax.faces.event.PostValidateEvent</system-event-class>
+            <system-event-listener-class>com.github.beisser.systemEventListener.InputFieldValidationListener</system-event-listener-class>
+        </system-event-listener>
+        <system-event-listener>
+            <system-event-listener-class>com.github.beisser.systemEventListener.AppStartListener</system-event-listener-class>
+            <system-event-class>javax.faces.event.PostConstructApplicationEvent</system-event-class>
+        </system-event-listener>
+        <system-event-listener>
+            <system-event-listener-class>com.github.beisser.systemEventListener.AppStartListener</system-event-listener-class>
+            <system-event-class>javax.faces.event.PreDestroyApplicationEvent</system-event-class>
+        </system-event-listener>
     </application>
 
     <navigation-rule>
