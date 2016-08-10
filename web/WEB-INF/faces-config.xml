@@ -3,7 +3,13 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
     http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd">
-  
+
+    <lifecycle>
+        <phase-listener>
+            com.github.beisser.phaseListener.AuthPhaseListener
+        </phase-listener>
+    </lifecycle>
+
     <application>
         <resource-bundle>
             <!-- definie Resource Bundle to access properties File -->
@@ -11,4 +17,24 @@
             <var>messages</var>
         </resource-bundle>
     </application>
+
+    <navigation-rule>
+        <from-view-id>/index.xhtml</from-view-id>
+        <navigation-case>
+            <from-action>#{userController.goTo()}</from-action>
+            <from-outcome>success</from-outcome>
+            <to-view-id>/users.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{userController.goTo()}</from-action>
+            <from-outcome>fail</from-outcome>
+            <to-view-id>/index.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+    <factory>
+        <exception-handler-factory>com.github.beisser.exception.AppExceptionHandlerFactory</exception-handler-factory>
+    </factory>
 </faces-config>

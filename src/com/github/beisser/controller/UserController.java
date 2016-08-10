@@ -88,6 +88,10 @@ public class UserController {
         return "users";
     }
 
+    public String goTo() {
+        return true ? "success" : "fail";
+    }
+
     public List<User> getUsers() {
         return users;
     }

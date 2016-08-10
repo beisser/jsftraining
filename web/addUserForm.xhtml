@@ -22,7 +22,10 @@
                 <h:message for="firstName"></h:message>
 
                 <h:outputLabel for="lastName">Last Name</h:outputLabel>
-                <h:inputText id="lastName" styleClass="form-control" value="#{user.lastName}"></h:inputText>
+                <h:inputText id="lastName" styleClass="form-control" value="#{user.lastName}">
+                    <f:converter converterId="com.github.beisser.converter.ToUpperConverter"></f:converter>
+                    <f:validator validatorId="com.github.beisser.validator.LowerCaseValidator"></f:validator>
+                </h:inputText>
                 <h:message for="lastName"></h:message>
 
                 <h:outputLabel for="email">Email</h:outputLabel>
