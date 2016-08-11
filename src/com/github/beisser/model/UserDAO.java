@@ -148,7 +148,7 @@ public class UserDAO {
         try {
             connection = _getConnection();
 
-            String sql = "update user "
+            String sql = "update users "
                     + " set first_name=?, last_name=?, email=?"
                     + " where id=?";
 

@@ -10,8 +10,8 @@ import javax.faces.validator.ValidatorException;
 /**
  * Created by Nico on 10.08.2016.
  */
-@FacesValidator("com.github.beisser.validator.LowerCaseValidator")
-public class LowerCaseValidator implements Validator{
+@FacesValidator("com.github.beisser.validator.UpperCaseValidator")
+public class UpperCaseValidator implements Validator{
     @Override
     public void validate(FacesContext facesContext, UIComponent uiComponent, Object o) throws ValidatorException {
         if (o == null) {
@@ -20,8 +20,8 @@ public class LowerCaseValidator implements Validator{
 
         String data = o.toString();
 
-        if (!data.equals(data.toLowerCase())) {
-            FacesMessage message = new FacesMessage("Alles muss klein geschrieben werden");
+        if (!data.equals(data.toUpperCase())) {
+            FacesMessage message = new FacesMessage("Alles muss groß geschrieben werden");
             throw new ValidatorException(message);
         }
     }

@@ -12,7 +12,7 @@
         </ui:define>
 
         <ui:define name="js">
-            <h:outputScript library="js" name="users/users.js"></h:outputScript>
+            <h:outputScript library="js" name="users/users.js" target="head"></h:outputScript>
         </ui:define>
 
         <ui:define name="title">User Management</ui:define>
@@ -27,7 +27,7 @@
 
             <h:button value="Add User" styleClass="btn btn-default" outcome="addUserForm"></h:button>
 
-            <h:form>
+            <h:form id="user_form">
                 <h:dataTable value="#{userController.users}" var="u" styleClass="table table-striped">
                     <h:column>
                         <f:facet name="header">First Name</f:facet>
@@ -42,10 +42,16 @@
                         #{u.email}
                     </h:column>
                     <h:column>
-                        <h:commandLink value="Update" action="#{userController.loadUser(u.id)}"></h:commandLink>
-                        <h:commandLink value="Delete"
-                                       id="delete_user"
-                                       action="#{userController.deleteUser(u.id)}"/>
+                        <h:commandButton value="Show" action="showUser?faces-redirect=true"
+                                         styleClass="btn btn-default"
+                                         immediate="true"></h:commandButton>
+                        <h:commandButton value="Update" action="#{userController.loadUser(u.id)}"
+                                         styleClass="btn btn-default"
+                                         immediate="true"></h:commandButton>
+                        <h:commandButton value="Delete"
+                                       onclick="if (!confirm('Delete User?')) return false"
+                                       action="#{userController.deleteUser(u.id)}"
+                                       styleClass="btn btn-default" immediate="true"/>
                     </h:column>
                 </h:dataTable>
             </h:form>

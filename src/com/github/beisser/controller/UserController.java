@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 public class UserController implements Serializable {
 
     private List<User> users;
+    private User user;
     private UserDAO userDAO;
     private Logger logger = Logger.getLogger(getClass().getName());
 
@@ -58,14 +59,15 @@ public class UserController implements Serializable {
     // fetches the object, adding it to the request map, send it to updateUserForm
     public String loadUser(int id) {
         try {
-            User user = userDAO.getUser(id);
+            User currentUser = userDAO.getUser(id);
 
             // helper to add data to memory
-            ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
+//            ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
 
             // add data to request
-            Map<String, Object> requestMap = externalContext.getRequestMap();
-            requestMap.put("user", user);
+//            Map<String, Object> requestMap = externalContext.getRequestMap();
+//            requestMap.put("user", currentUser);
+            user = currentUser;
         } catch(Exception e) {
             AppUtils.addErrorMessage(e);
         }
@@ -102,4 +104,11 @@ public class UserController implements Serializable {
         this.users = users;
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 }
