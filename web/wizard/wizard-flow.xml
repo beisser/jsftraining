@@ -4,6 +4,6 @@
               xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
     http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd">
 
-    <flow-definition id="wizard"></flow-definition>
+    <!--<flow-definition id="wizard"></flow-definition>-->
 
 </faces-config>

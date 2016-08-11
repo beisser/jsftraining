@@ -4,10 +4,12 @@ import com.github.beisser.model.User;
 import com.github.beisser.model.UserDAO;
 import com.github.beisser.util.AppUtils;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+
+import javax.enterprise.context.SessionScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.inject.Named;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,9 +18,9 @@ import java.util.logging.Logger;
 /**
  * Created by Nico on 08.08.2016.
  */
-@ManagedBean
+@Named
 @SessionScoped
-public class UserController {
+public class UserController implements Serializable {
 
     private List<User> users;
     private UserDAO userDAO;
@@ -56,14 +58,14 @@ public class UserController {
     // fetches the object, adding it to the request map, send it to updateUserForm
     public String loadUser(int id) {
         try {
-            User fetchedUser = userDAO.getUser(id);
+            User user = userDAO.getUser(id);
 
             // helper to add data to memory
             ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
 
             // add data to request
             Map<String, Object> requestMap = externalContext.getRequestMap();
-            requestMap.put("user", fetchedUser);
+            requestMap.put("user", user);
         } catch(Exception e) {
             AppUtils.addErrorMessage(e);
         }
