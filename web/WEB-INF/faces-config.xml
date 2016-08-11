@@ -11,6 +11,9 @@
     <!--</lifecycle>-->
 
     <application>
+        <locale-config>
+            <default-locale>en</default-locale>
+        </locale-config>
         <resource-bundle>
             <!-- definie Resource Bundle to access properties File -->
             <base-name>com.github.beisser.messages</base-name>

@@ -16,7 +16,7 @@
         <ui:define name="content">
             <!--<h:messages></h:messages>-->
 
-            <h:form id="userForm">
+            <h:form id="userForm" enctype="multipart/form-data">
                 <h:panelGrid columns="3">
                     <h:outputLabel for="firstName">#{messages["user.label.username"]}</h:outputLabel>
                     <h:inputText id="firstName" styleClass="form-control" value="#{user.firstName}" required="true"
@@ -33,6 +33,10 @@
                     <h:outputLabel for="email">Email</h:outputLabel>
                     <h:inputText id="email" styleClass="form-control" value="#{user.email}"></h:inputText>
                     <h:message for="email"></h:message>
+
+                    <h:outputLabel for="image">Image</h:outputLabel>
+                    <h:inputFile id="image" value="#{user.image}" required="true"></h:inputFile>
+                    <h:message for="image"></h:message>
 
                     <h:commandButton value="Save User" styleClass="btn btn-default"
                                      action="#{userController.addUser(user)}"></h:commandButton>

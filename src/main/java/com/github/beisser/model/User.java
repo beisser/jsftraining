@@ -3,6 +3,7 @@ package com.github.beisser.model;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Named;
+import javax.servlet.http.Part;
 
 /**
  * Created by Nico on 07.08.2016.
@@ -14,6 +15,7 @@ public class User {
     private String firstName;
     private String lastName;
     private String email;
+    private Part image;
 
     public User() {
     }
@@ -55,6 +57,14 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Part getImage() {
+        return image;
+    }
+
+    public void setImage(Part image) {
+        this.image = image;
     }
 
     @Override

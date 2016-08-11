@@ -1,5 +1,6 @@
 lib
 out
+target
 /.idea
 web/resources/bootstrap
 web/WEB-INF/lib

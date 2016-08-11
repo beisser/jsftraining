@@ -1,9 +1,12 @@
 package com.github.beisser.model;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Singleton;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,7 +17,8 @@ import java.util.List;
 /**
  * Created by Nico on 08.08.2016.
  */
-public class UserDAO {
+@ApplicationScoped
+public class UserDAO implements Serializable{
 
     // variable to store the current singleton instance
     private static UserDAO instance;
@@ -36,7 +40,7 @@ public class UserDAO {
     public List<User> getUsers() throws Exception {
 
         // create empty array
-        List<User> users = new ArrayList<>();
+        List<User> users = new ArrayList<User>();
 
         Connection connection = null;
         Statement statement = null;
@@ -190,7 +194,8 @@ public class UserDAO {
     }
 
     // making the constructor private to force using getInstance to get the instance
-    private UserDAO() throws Exception{
+    // private UserDAO() throws Exception{
+    public UserDAO() throws Exception{
         // get the dataSource / Connection Pool and assign it the variable
         dataSource = _getDataSource();
     }

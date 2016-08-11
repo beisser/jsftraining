@@ -8,6 +8,7 @@ import com.github.beisser.util.AppUtils;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,12 +25,14 @@ public class UserController implements Serializable {
 
     private List<User> users;
     private User user;
+
+    @Inject
     private UserDAO userDAO;
     private Logger logger = Logger.getLogger(getClass().getName());
 
     public UserController() throws Exception {
         users = new ArrayList<User>();
-        userDAO = UserDAO.getInstance();
+//        userDAO = UserDAO.getInstance();
     }
 
     public void loadUsers() {
