@@ -1,14 +1,14 @@
 package com.github.beisser.controller;
 
-import javax.annotation.PostConstruct;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.RequestScoped;
+
+import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
+import javax.inject.Named;
 
 /**
  * Created by Nico on 10.08.2016.
  */
-@ManagedBean
+@Named
 @RequestScoped
 public class NavigationController {
 
@@ -26,5 +26,9 @@ public class NavigationController {
 
     public String processViewParameters() {
         return "viewParameters.xhtml?faces-redirect=true&amp;searchFor=google";
+    }
+
+    public String processWizard() {
+        return "wizard";
     }
 }
