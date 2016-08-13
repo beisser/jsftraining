@@ -1,7 +1,8 @@
-package com.github.beisser.model;
+package com.github.beisser.service;
+
+import com.github.beisser.model.User;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Singleton;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -18,26 +19,15 @@ import java.util.List;
  * Created by Nico on 08.08.2016.
  */
 @ApplicationScoped
-public class UserDAO implements Serializable{
+public class DbService {
 
-    // variable to store the current singleton instance
-    private static UserDAO instance;
     // variable to store the dataSource / tomcat connection pool
     private DataSource dataSource;
     // name of the connection pool
     private String jndiName = "java:comp/env/jdbc/users";
 
-    // implementing Singleton Pattern
-    // this method gives a handle to the only instance of the class
-    public static UserDAO getInstance() throws Exception {
-        if (instance == null) {
-            instance = new UserDAO();
-        }
-        return instance;
-    }
-
     // method to get all users from the database
-    public List<User> getUsers() throws Exception {
+    public List<User> findAll() throws Exception {
 
         // create empty array
         List<User> users = new ArrayList<User>();
@@ -105,7 +95,7 @@ public class UserDAO implements Serializable{
         }
     }
 
-    public User getUser(int userId) throws Exception{
+    public User findById(int userId) throws Exception{
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
@@ -171,7 +161,7 @@ public class UserDAO implements Serializable{
         }
     }
 
-    public void deleteUser(int userId) throws Exception {
+    public void delete(int userId) throws Exception {
 
         Connection connection = null;
         PreparedStatement statement = null;
@@ -194,8 +184,8 @@ public class UserDAO implements Serializable{
     }
 
     // making the constructor private to force using getInstance to get the instance
-    // private UserDAO() throws Exception{
-    public UserDAO() throws Exception{
+    // private DbService() throws Exception{
+    public DbService() throws Exception{
         // get the dataSource / Connection Pool and assign it the variable
         dataSource = _getDataSource();
     }

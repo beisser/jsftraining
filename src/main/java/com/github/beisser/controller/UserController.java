@@ -1,19 +1,16 @@
 package com.github.beisser.controller;
 
 import com.github.beisser.model.User;
-import com.github.beisser.model.UserDAO;
+import com.github.beisser.service.UserService;
 import com.github.beisser.util.AppUtils;
 
 
 import javax.enterprise.context.SessionScoped;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -27,12 +24,12 @@ public class UserController implements Serializable {
     private User user;
 
     @Inject
-    private UserDAO userDAO;
+    private UserService userService;
     private Logger logger = Logger.getLogger(getClass().getName());
 
     public UserController() throws Exception {
         users = new ArrayList<User>();
-//        userDAO = UserDAO.getInstance();
+//        userService = UserDAO.getInstance();
     }
 
     public void loadUsers() {
@@ -42,7 +39,7 @@ public class UserController implements Serializable {
         try {
 
             // get all users from database
-            users = userDAO.getUsers();
+            users = userService.findAll();
 
         } catch (Exception exc) {
             // send FacesMessage to next page to display errors
@@ -50,9 +47,10 @@ public class UserController implements Serializable {
         }
     }
 
-    public String addUser(User user) {
+    public String save(User user) {
+        String test = "da";
         try {
-            userDAO.addUser(user);
+            userService.save(user);
         } catch(Exception e) {
             AppUtils.addErrorMessage(e);
         }
@@ -62,7 +60,7 @@ public class UserController implements Serializable {
     // fetches the object, adding it to the request map, send it to updateUserForm
     public String loadUser(int id) {
         try {
-            User currentUser = userDAO.getUser(id);
+            User currentUser = userService.findById(id);
 
             // helper to add data to memory
 //            ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
@@ -77,18 +75,9 @@ public class UserController implements Serializable {
         return "updateUserForm";
     }
 
-    public String updateUser(User user) {
-        try {
-            userDAO.updateUser(user);
-        } catch(Exception e) {
-            AppUtils.addErrorMessage(e);
-        }
-        return "users";
-    }
-
     public String deleteUser(int id) {
         try {
-            userDAO.deleteUser(id);
+            userService.delete(id);
         } catch(Exception e) {
             AppUtils.addErrorMessage(e);
         }
