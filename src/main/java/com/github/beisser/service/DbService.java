@@ -13,6 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -55,8 +56,14 @@ public class DbService {
                 String firstName = resultSet.getString("first_name");
                 String lastName = resultSet.getString("last_name");
                 String email = resultSet.getString("email");
+                java.sql.Date birthdaySql = resultSet.getDate("birthday");
+                Date birthday = new Date(birthdaySql.getTime());
+                String street = resultSet.getString("street");
+                int plz = resultSet.getInt("plz");
+                String city = resultSet.getString("city");
 
-                User currentUser = new User(id,firstName,lastName,email);
+                User currentUser = new User(id, firstName, lastName,
+                        email,birthday,street,plz,city);
 
                 // add it to the list of users
                 users.add(currentUser);
@@ -79,13 +86,17 @@ public class DbService {
             connection = _getConnection();
 
             // prepared sql statement
-            String sql = "insert into users (first_name, last_name, email) values (?, ?, ?)";
+            String sql = "insert into users (first_name, last_name, email, birthday, street, plz, city) values (?, ?, ?, ?, ?, ?, ?)";
             statement = connection.prepareStatement(sql);
 
             // set params
             statement.setString(1, user.getFirstName());
             statement.setString(2, user.getLastName());
             statement.setString(3, user.getEmail());
+            statement.setDate(4,new java.sql.Date(user.getBirthday().getTime()));
+            statement.setString(5,user.getStreet());
+            statement.setInt(6,user.getPlz());
+            statement.setString(7,user.getCity());
 
             statement.execute();
         }
@@ -120,9 +131,14 @@ public class DbService {
                 String firstName = resultSet.getString("first_name");
                 String lastName = resultSet.getString("last_name");
                 String email = resultSet.getString("email");
+                java.sql.Date birthdaySql = resultSet.getDate("birthday");
+                Date birthday = new Date(birthdaySql.getTime());
+                String street = resultSet.getString("street");
+                int plz = resultSet.getInt("plz");
+                String city = resultSet.getString("city");
 
                 fetchedUser = new User(id, firstName, lastName,
-                        email);
+                        email,birthday,street,plz,city);
             }
             else {
                 throw new Exception("Unable to find user with id: " + userId);
@@ -143,7 +159,7 @@ public class DbService {
             connection = _getConnection();
 
             String sql = "update users "
-                    + " set first_name=?, last_name=?, email=?"
+                    + " set first_name=?, last_name=?, email=?, birthday=?, street=?, plz=?, city=?"
                     + " where id=?";
 
             statement = connection.prepareStatement(sql);
@@ -152,7 +168,11 @@ public class DbService {
             statement.setString(1, user.getFirstName());
             statement.setString(2, user.getLastName());
             statement.setString(3, user.getEmail());
-            statement.setInt(4, user.getId());
+            statement.setDate(4,new java.sql.Date(user.getBirthday().getTime()));
+            statement.setString(5,user.getStreet());
+            statement.setInt(6,user.getPlz());
+            statement.setString(7,user.getCity());
+            statement.setInt(8, user.getId());
 
             statement.execute();
         }

@@ -34,6 +34,25 @@
                     <h:inputText id="email" styleClass="form-control" value="#{user.email}"></h:inputText>
                     <h:message for="email"></h:message>
 
+                    <h:outputLabel for="birthday">Birthday</h:outputLabel>
+                    <h:inputText id="birthday" styleClass="form-control" value="#{user.birthday}" required="true"
+                                 requiredMessage="Birthday can not be emtpy">
+                        <f:convertDateTime pattern="dd.MM.yyyy"></f:convertDateTime>
+                    </h:inputText>
+                    <h:message for="birthday"></h:message>
+
+                    <h:outputLabel for="street">Street</h:outputLabel>
+                    <h:inputText id="street" styleClass="form-control" value="#{user.street}"></h:inputText>
+                    <h:message for="street"></h:message>
+
+                    <h:outputLabel for="plz">PLZ</h:outputLabel>
+                    <h:inputText id="plz" styleClass="form-control" value="#{user.plz}"></h:inputText>
+                    <h:message for="plz"></h:message>
+
+                    <h:outputLabel for="city">City</h:outputLabel>
+                    <h:inputText id="city" styleClass="form-control" value="#{user.city}"></h:inputText>
+                    <h:message for="city"></h:message>
+
                     <h:outputLabel for="image">Image</h:outputLabel>
                     <h:inputFile id="image" value="#{user.image}" required="true"></h:inputFile>
                     <h:message for="image"></h:message>

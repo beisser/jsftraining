@@ -4,6 +4,7 @@ package com.github.beisser.model;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Named;
 import javax.servlet.http.Part;
+import java.util.Date;
 
 /**
  * Created by Nico on 07.08.2016.
@@ -14,17 +15,26 @@ public class User {
     private int id;
     private String firstName;
     private String lastName;
+    private Date birthday;
+    private String street;
+    private int plz;
+    private String city;
     private String email;
     private Part image;
 
     public User() {
     }
 
-    public User(int id, String firstName,String lastName, String email) {
+    public User(int id, String firstName,String lastName, String email,
+                Date birthday, String street,int plz, String city) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+        this.birthday = birthday;
+        this.street = street;
+        this.plz = plz;
+        this.city = city;
     }
 
     public int getId() {
@@ -65,6 +75,38 @@ public class User {
 
     public void setImage(Part image) {
         this.image = image;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
+    public int getPlz() {
+        return plz;
+    }
+
+    public void setPlz(int plz) {
+        this.plz = plz;
+    }
+
+    public String getStreet() {
+        return street;
+    }
+
+    public void setStreet(String street) {
+        this.street = street;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
     }
 
     @Override
