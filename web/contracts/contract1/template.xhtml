@@ -79,12 +79,10 @@
             </div>
         </ui:insert>
 
-        <!-- Placeholder for footer -->
-        <ui:insert name="footer">
-            <!-- Default Footer Html Code here -->
-            <hr/>
-            &copy; Nico 2016
-        </ui:insert>
+        <!-- include a footer partial -->
+        <ui:include src="/WEB-INF/includes/footer.xhtml">
+            <ui:param name="copyright" value="&copy; Nico 2016"/>
+        </ui:include>
     </div>
 
 </h:body>

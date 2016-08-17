@@ -12,6 +12,9 @@ import javax.faces.validator.ValidatorException;
  */
 @FacesValidator("com.github.beisser.validator.UpperCaseValidator")
 public class UpperCaseValidator implements Validator{
+
+    private String alternativeMessage;
+
     @Override
     public void validate(FacesContext facesContext, UIComponent uiComponent, Object o) throws ValidatorException {
         if (o == null) {
@@ -19,10 +22,19 @@ public class UpperCaseValidator implements Validator{
         }
 
         String data = o.toString();
+        String validatorMessage = alternativeMessage != null ? alternativeMessage : "Alles muss groß geschrieben werden";
 
         if (!data.equals(data.toUpperCase())) {
-            FacesMessage message = new FacesMessage("Alles muss groß geschrieben werden");
+            FacesMessage message = new FacesMessage(validatorMessage);
             throw new ValidatorException(message);
         }
+    }
+
+    public String getAlternativeMessage() {
+        return alternativeMessage;
+    }
+
+    public void setAlternativeMessage(String alternativeMessage) {
+        this.alternativeMessage = alternativeMessage;
     }
 }

@@ -4,7 +4,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-      xmlns:f="http://xmlns.jcp.org/jsf/core">
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:nb="http://com.github/beisser">
 <f:view contracts="#{contract.contract}">
     <ui:composition template="/template.xhtml">
 
@@ -25,8 +26,10 @@
 
                     <h:outputLabel for="lastName">Last Name</h:outputLabel>
                     <h:inputText id="lastName" styleClass="form-control" value="#{user.lastName}">
-                        <f:converter converterId="com.github.beisser.converter.ToUpperConverter"></f:converter>
-                        <f:validator validatorId="com.github.beisser.validator.UpperCaseValidator"></f:validator>
+                        <!--<f:converter converterId="com.github.beisser.converter.ToUpperConverter"></f:converter>-->
+                        <nb:toUpperConverter/>
+                        <!--<f:validator validatorId="com.github.beisser.validator.UpperCaseValidator"></f:validator>-->
+                        <nb:upperCaseValidator alternativeMessage="Bitte Uppercase beachten"/>
                     </h:inputText>
                     <h:message for="lastName"></h:message>
 
