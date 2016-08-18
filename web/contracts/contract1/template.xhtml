@@ -47,17 +47,9 @@
 
                 <div class="collapse navbar-collapse" id="mainNavBar">
                     <h:form>
-                        <ul class="nav navbar-nav">
-                            <li>
-                                <h:commandLink action="#{navigationController.processIndex()}" value="Home"></h:commandLink>
-                            </li>
-                            <li>
-                                <h:commandLink action="#{navigationController.processUsers()}" value="User Management"></h:commandLink>
-                            </li>
-                            <li>
-                                <h:commandLink action="#{navigationController.processViewParameters()}" value="View Parameter"></h:commandLink>
-                            </li>
-                        </ul>
+                        <ui:insert name="navigation">
+
+                        </ui:insert>
                     </h:form>
                 </div>
             </div>
