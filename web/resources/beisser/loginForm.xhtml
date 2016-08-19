@@ -1,0 +1,30 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
+
+    <!-- component attributes -->
+    <cc:interface>
+        <cc:attribute name="usernameValue" required="true"></cc:attribute>
+        <cc:attribute name="passwordValue" required="true"></cc:attribute>
+        <cc:attribute name="action" required="true" targets="submit"></cc:attribute>
+        <cc:editableValueHolder name="input" targets="username password"/>
+        <cc:actionSource name="submit"/>
+    </cc:interface>
+
+    <!-- component implementation -->
+    <cc:implementation>
+        <div class="navbar-form navbar-right">
+                <h:inputText id="username"
+                             value="#{cc.attrs.usernameValue}"
+                             styleClass="form-control"
+                             a:placeholder="Username"/>
+                <h:inputText id="password"
+                             value="#{cc.attrs.passwordValue}"
+                             styleClass="form-control"
+                             a:placeholder="Password"/>
+                <h:commandButton id="submit" value="Login" styleClass="btn btn-default"/>
+        </div>
+    </cc:implementation>
+</ui:composition>
