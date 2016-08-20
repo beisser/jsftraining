@@ -17,15 +17,10 @@ public class AppStartListener implements SystemEventListener{
 
         Logger logger = Logger.getLogger(getClass().getName());
 
-        FacesContext facesContext = FacesContext.getCurrentInstance();
-        ELContext elContext = facesContext.getELContext();
-        DbServiceJPA bean = (DbServiceJPA) elContext.getELResolver().getValue(elContext,null,"dbServiceJPA");
-
         // which event should be handled
         if (systemEvent instanceof PostConstructApplicationEvent) {
             logger.info("JUST STARTED");
         } else if (systemEvent instanceof PreDestroyApplicationEvent) {
-            bean.closeEm();
             logger.info("TO BE DESTROYED");
         }
     }

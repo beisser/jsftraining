@@ -3,6 +3,8 @@ package com.github.beisser.controller;
 import com.github.beisser.model.User;
 import com.github.beisser.service.UserService;
 import com.github.beisser.util.AppUtils;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 
 
 import javax.enterprise.context.SessionScoped;
@@ -54,7 +56,7 @@ public class UserController implements Serializable {
         } catch(Exception e) {
             AppUtils.addErrorMessage(e);
         }
-        return "users?faces-redirect=true";
+        return "users";
     }
 
     // fetches the object, adding it to the request map, send it to updateUserForm
@@ -72,7 +74,7 @@ public class UserController implements Serializable {
         } catch(Exception e) {
             AppUtils.addErrorMessage(e);
         }
-        return "updateUserForm?faces-redirect=true";
+        return "updateUserForm";
     }
 
     public String deleteUser(int id) {
@@ -82,6 +84,12 @@ public class UserController implements Serializable {
             AppUtils.addErrorMessage(e);
         }
         return "users";
+    }
+
+    public void resetUser(){
+        if (this.user != null) {
+            this.user = new User();
+        }
     }
 
     public String goTo() {
