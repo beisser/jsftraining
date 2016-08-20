@@ -36,4 +36,27 @@
         <param-name>javax.faces.INTERPRET_EMPTY_STRING_VALUES_AS_NULL</param-name>
         <param-value>true</param-value>
     </context-param>
+
+
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>admin</web-resource-name>
+            <!-- Path to the protected area -->
+            <url-pattern>/basic/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <!-- which roles should have access to the restricted area -->
+            <role-name>admin</role-name>
+        </auth-constraint>
+    </security-constraint>
+    <login-config>
+        <!-- auth type -->
+        <auth-method>BASIC</auth-method>
+        <!-- name of the realm; users with accepted role need to be added in glassfish admin console -->
+        <!-- server-config > Security > Realms > file -->
+        <realm-name>file</realm-name>
+    </login-config>
+    <security-role>
+        <role-name>admin</role-name>
+    </security-role>
 </web-app>

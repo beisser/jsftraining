@@ -1,0 +1,18 @@
+<!DOCTYPE glassfish-web-app PUBLIC "-//GlassFish.org//DTD
+GlassFish Application Server 3.1 Servlet 3.0//EN"
+        "http://glassfish.org/dtds/glassfish-web-app_3_0-1.dtd">
+<glassfish-web-app>
+    <session-config>
+        <session-manager/>
+    </session-config>
+    <resource-ref>
+        <res-ref-name>mail/Session</res-ref-name>
+        <jndi-name>mail/Session</jndi-name>
+    </resource-ref>
+    <jsp-config/>
+    <security-role-mapping>
+        <role-name>admin</role-name>
+        <!-- the group name must be assigned to a user added to the realm in glassfish admin console -->
+        <group-name>admin</group-name>
+    </security-role-mapping>
+</glassfish-web-app>
