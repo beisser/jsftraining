@@ -2,6 +2,7 @@ package com.github.beisser.service;
 
 import com.github.beisser.model.User;
 
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.List;
@@ -13,26 +14,33 @@ import java.util.List;
 public class UserService {
 
     @Inject
-    private DbService dbService;
+    private DbServiceJPA dbService;
 
     public List<User> findAll() throws Exception {
-        return dbService.findAll();
+        List<User> result = dbService.findAll(User.class);
+        dbService.closeEm();
+        return result;
     }
 
     public String save(User user) throws Exception{
         if (user.getId() == 0) {
-            dbService.addUser(user);
+            dbService.add(user);
         } else {
-            dbService.updateUser(user);
+            dbService.update(user);
         }
+        dbService.flush();
+        dbService.closeEm();
         return "users";
     }
 
     public User findById(int id) throws Exception{
-        return dbService.findById(id);
+        User result = dbService.findById(User.class,id);
+        dbService.closeEm();
+        return result;
     }
 
     public void delete(int id) throws Exception {
         dbService.delete(id);
+        dbService.closeEm();
     }
 }

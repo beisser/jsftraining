@@ -18,7 +18,10 @@ import java.util.List;
 
 /**
  * Created by Nico on 08.08.2016.
+ *
+ * no longer needed because of change to JPA
  */
+@Deprecated
 @ApplicationScoped
 public class DbService {
 
@@ -62,8 +65,7 @@ public class DbService {
                 int plz = resultSet.getInt("plz");
                 String city = resultSet.getString("city");
 
-                User currentUser = new User(id, firstName, lastName,
-                        email,birthday,street,plz,city);
+                User currentUser = new User();
 
                 // add it to the list of users
                 users.add(currentUser);
@@ -137,8 +139,7 @@ public class DbService {
                 int plz = resultSet.getInt("plz");
                 String city = resultSet.getString("city");
 
-                fetchedUser = new User(id, firstName, lastName,
-                        email,birthday,street,plz,city);
+                fetchedUser = new User();
             }
             else {
                 throw new Exception("Unable to find user with id: " + userId);

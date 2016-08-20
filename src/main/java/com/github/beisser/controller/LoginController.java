@@ -2,6 +2,7 @@ package com.github.beisser.controller;
 
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Named;
+import javax.persistence.Persistence;
 import java.io.Serializable;
 
 /**

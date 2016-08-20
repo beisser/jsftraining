@@ -1,41 +1,48 @@
 package com.github.beisser.model;
 
-
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Named;
+import javax.persistence.*;
 import javax.servlet.http.Part;
 import java.util.Date;
 
 /**
  * Created by Nico on 07.08.2016.
  */
-@Named
-@RequestScoped
+@Entity
+@Table(name = "users")
 public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @Column(name="first_name")
     private String firstName;
+
+    @Column(name="last_name")
     private String lastName;
+
+    @Transient
     private Date birthday;
     private String street;
     private int plz;
     private String city;
     private String email;
+    @Transient
     private Part image;
 
     public User() {
     }
 
-    public User(int id, String firstName,String lastName, String email,
-                Date birthday, String street,int plz, String city) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.birthday = birthday;
-        this.street = street;
-        this.plz = plz;
-        this.city = city;
-    }
+//    public User(int id, String firstName,String lastName, String email,
+//                Date birthday, String street,int plz, String city) {
+//        this.id = id;
+//        this.firstName = firstName;
+//        this.lastName = lastName;
+//        this.email = email;
+//        this.birthday = birthday;
+//        this.street = street;
+//        this.plz = plz;
+//        this.city = city;
+//    }
 
     public int getId() {
         return id;

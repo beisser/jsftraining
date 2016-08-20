@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 public class UserController implements Serializable {
 
     private List<User> users;
-    private User user;
+    private User user = new User();
 
     @Inject
     private UserService userService;
@@ -54,7 +54,7 @@ public class UserController implements Serializable {
         } catch(Exception e) {
             AppUtils.addErrorMessage(e);
         }
-        return "users";
+        return "users?faces-redirect=true";
     }
 
     // fetches the object, adding it to the request map, send it to updateUserForm
@@ -72,7 +72,7 @@ public class UserController implements Serializable {
         } catch(Exception e) {
             AppUtils.addErrorMessage(e);
         }
-        return "updateUserForm";
+        return "updateUserForm?faces-redirect=true";
     }
 
     public String deleteUser(int id) {

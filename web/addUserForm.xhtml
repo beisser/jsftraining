@@ -20,12 +20,12 @@
             <h:form id="userForm" enctype="multipart/form-data">
                 <h:panelGrid columns="3">
                     <h:outputLabel for="firstName">#{messages["user.label.username"]}</h:outputLabel>
-                    <h:inputText id="firstName" styleClass="form-control" value="#{user.firstName}" required="true"
+                    <h:inputText id="firstName" styleClass="form-control" value="#{userController.user.firstName}" required="true"
                                  requiredMessage="First name can not be empty"></h:inputText>
                     <h:message for="firstName"></h:message>
 
                     <h:outputLabel for="lastName">Last Name</h:outputLabel>
-                    <h:inputText id="lastName" styleClass="form-control" value="#{user.lastName}">
+                    <h:inputText id="lastName" styleClass="form-control" value="#{userController.user.lastName}">
                         <!--<f:converter converterId="com.github.beisser.converter.ToUpperConverter"></f:converter>-->
                         <nb:toUpperConverter/>
                         <!--<f:validator validatorId="com.github.beisser.validator.UpperCaseValidator"></f:validator>-->
@@ -34,34 +34,34 @@
                     <h:message for="lastName"></h:message>
 
                     <h:outputLabel for="email">Email</h:outputLabel>
-                    <h:inputText id="email" styleClass="form-control" value="#{user.email}"></h:inputText>
+                    <h:inputText id="email" styleClass="form-control" value="#{userController.user.email}"></h:inputText>
                     <h:message for="email"></h:message>
 
                     <h:outputLabel for="birthday">Birthday</h:outputLabel>
-                    <h:inputText id="birthday" styleClass="form-control" value="#{user.birthday}" required="true"
+                    <h:inputText id="birthday" styleClass="form-control" value="#{userController.user.birthday}" required="true"
                                  requiredMessage="Birthday can not be emtpy">
                         <f:convertDateTime pattern="dd.MM.yyyy"></f:convertDateTime>
                     </h:inputText>
                     <h:message for="birthday"></h:message>
 
                     <h:outputLabel for="street">Street</h:outputLabel>
-                    <h:inputText id="street" styleClass="form-control" value="#{user.street}"></h:inputText>
+                    <h:inputText id="street" styleClass="form-control" value="#{userController.user.street}"></h:inputText>
                     <h:message for="street"></h:message>
 
                     <h:outputLabel for="plz">PLZ</h:outputLabel>
-                    <h:inputText id="plz" styleClass="form-control" value="#{user.plz}"></h:inputText>
+                    <h:inputText id="plz" styleClass="form-control" value="#{userController.user.plz}"></h:inputText>
                     <h:message for="plz"></h:message>
 
                     <h:outputLabel for="city">City</h:outputLabel>
-                    <h:inputText id="city" styleClass="form-control" value="#{user.city}"></h:inputText>
+                    <h:inputText id="city" styleClass="form-control" value="#{userController.user.city}"></h:inputText>
                     <h:message for="city"></h:message>
 
                     <h:outputLabel for="image">Image</h:outputLabel>
-                    <h:inputFile id="image" value="#{user.image}" required="true"></h:inputFile>
+                    <h:inputFile id="image" value="#{userController.user.image}" required="true"></h:inputFile>
                     <h:message for="image"></h:message>
 
                     <h:commandButton value="Save User" styleClass="btn btn-default"
-                                     action="#{userController.save(user)}"></h:commandButton>
+                                     action="#{userController.save(userController.user)}"></h:commandButton>
                     <h:commandButton value="Cancel" styleClass="btn btn-default" immediate="true"
                                      action="#{navigationController.processUsers()}"></h:commandButton>
                 </h:panelGrid>

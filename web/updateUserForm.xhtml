@@ -52,7 +52,7 @@
                     <h:commandButton value="Cancel" styleClass="btn btn-default" immediate="true"
                                      action="#{navigationController.processUsers()}"></h:commandButton>
 
-                    <h:inputHidden value="#{user.id}"></h:inputHidden>
+                    <h:inputHidden value="#{userController.user.id}"></h:inputHidden>
                 </h:panelGrid>
             </h:form>
         </ui:define>
