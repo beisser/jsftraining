@@ -4,18 +4,31 @@
     <!-- namespace of the custom lib -->
     <namespace>http://com.github/beisser</namespace>
 
+    <!-- tag for custom converter -->
     <tag>
         <tag-name>toUpperConverter</tag-name>
         <converter>
             <converter-id>com.github.beisser.converter.ToUpperConverter</converter-id>
         </converter>
     </tag>
+
+    <!-- tag for custom validator -->
     <tag>
         <tag-name>upperCaseValidator</tag-name>
         <validator>
             <validator-id>com.github.beisser.validator.UpperCaseValidator</validator-id>
         </validator>
     </tag>
+
+    <!-- tag for composite component -->
+    <tag>
+        <tag-name>loginForm</tag-name>
+        <component>
+            <resource-id>beisser/loginForm.xhtml</resource-id>
+        </component>
+    </tag>
+
+    <!-- tag for classic custom component -->
     <tag>
         <tag-name>toUpperRenderer</tag-name>
         <component>
