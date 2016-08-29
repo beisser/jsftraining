@@ -28,6 +28,10 @@ public class NavigationController {
         return "viewParameters.xhtml?faces-redirect=true&amp;searchFor=google";
     }
 
+    public String processBasicProtected() {
+        return "basic/index.xthml?faces-redirect=true";
+    }
+
     public String processWizard() {
         return "wizard";
     }

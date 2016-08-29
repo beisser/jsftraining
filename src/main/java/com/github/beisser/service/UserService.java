@@ -18,7 +18,6 @@ public class UserService {
 
     public List<User> findAll() throws Exception {
         List<User> result = dbService.findAll(User.class);
-        dbService.closeEm();
         return result;
     }
 
@@ -28,19 +27,18 @@ public class UserService {
         } else {
             dbService.update(user);
         }
-        dbService.flush();
-        dbService.closeEm();
         return "users";
     }
 
     public User findById(int id) throws Exception{
         User result = dbService.findById(User.class,id);
-        dbService.closeEm();
         return result;
     }
 
     public void delete(int id) throws Exception {
-        dbService.delete(id);
-        dbService.closeEm();
+        User userToDelete = this.findById(id);
+        if (userToDelete != null) {
+            dbService.delete(userToDelete);
+        }
     }
 }

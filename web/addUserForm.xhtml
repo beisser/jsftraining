@@ -9,6 +9,12 @@
 <f:view contracts="#{contract.contract}">
     <ui:composition template="/adminTemplate.xhtml">
 
+        <ui:define name="metadata">
+            <f:metadata>
+                <f:viewAction action="#{userController.resetUser}"></f:viewAction>
+            </f:metadata>
+        </ui:define>
+
         <ui:define name="header">
             <h3>Add a User</h3>
             <hr></hr>
@@ -57,7 +63,7 @@
                     <h:message for="city"></h:message>
 
                     <h:outputLabel for="image">Image</h:outputLabel>
-                    <h:inputFile id="image" value="#{userController.user.image}" required="true"></h:inputFile>
+                    <h:inputFile id="image" value="#{userController.user.image}" required="false"></h:inputFile>
                     <h:message for="image"></h:message>
 
                     <h:commandButton value="Save User" styleClass="btn btn-default"

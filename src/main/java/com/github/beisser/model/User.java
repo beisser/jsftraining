@@ -2,6 +2,7 @@ package com.github.beisser.model;
 
 import javax.persistence.*;
 import javax.servlet.http.Part;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -9,7 +10,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements Serializable{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -20,7 +21,7 @@ public class User {
     @Column(name="last_name")
     private String lastName;
 
-    @Transient
+    @Temporal(TemporalType.TIMESTAMP)
     private Date birthday;
     private String street;
     private int plz;
@@ -31,18 +32,6 @@ public class User {
 
     public User() {
     }
-
-//    public User(int id, String firstName,String lastName, String email,
-//                Date birthday, String street,int plz, String city) {
-//        this.id = id;
-//        this.firstName = firstName;
-//        this.lastName = lastName;
-//        this.email = email;
-//        this.birthday = birthday;
-//        this.street = street;
-//        this.plz = plz;
-//        this.city = city;
-//    }
 
     public int getId() {
         return id;

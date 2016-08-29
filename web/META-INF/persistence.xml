@@ -2,7 +2,8 @@
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
              version="2.0">
-    <persistence-unit name="beisser" transaction-type="RESOURCE_LOCAL">
+    <persistence-unit name="beisser" transaction-type="JTA">
+        <jta-data-source>jdbc/users</jta-data-source>
         <class>com.github.beisser.model.User</class>
         <properties>
             <property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver"/>

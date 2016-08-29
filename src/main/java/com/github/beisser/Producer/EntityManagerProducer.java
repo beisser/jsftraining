@@ -19,22 +19,18 @@ public class EntityManagerProducer {
 
     final String UNITNAME = "beisser";
 
-    @PersistenceContext(unitName = UNITNAME, type = PersistenceContextType.EXTENDED)
+    @PersistenceContext(unitName = UNITNAME)
     private EntityManager entityManager;
 
     @Produces
     @RequestScoped
     public EntityManager createEntityManager() {
-        if (this.entityManager == null) {
-            // tomcat workaround
-            this.entityManager = Persistence.createEntityManagerFactory(UNITNAME).createEntityManager();
-        }
         return this.entityManager;
     }
 
     public void dispose(@Disposes EntityManager em) {
-        if (em.isOpen()) {
-            em.close();
-        }
+//        if (em.isOpen()) {
+//            em.close();
+//        }
     }
 }

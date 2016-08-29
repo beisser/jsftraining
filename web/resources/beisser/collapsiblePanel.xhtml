@@ -1,0 +1,16 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
+
+    <!-- component attributes -->
+    <cc:interface componentType="com.github.beisser.gui.jsf.component.CollapsiblePanel">
+        <cc:attribute name="displayed"/>
+    </cc:interface>
+
+    <!-- component implementation -->
+    <cc:implementation>
+        <h:outputText value="#{cc.collapsed}"/>
+    </cc:implementation>
+</ui:composition>
