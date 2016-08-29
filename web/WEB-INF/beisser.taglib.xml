@@ -16,4 +16,10 @@
             <validator-id>com.github.beisser.validator.UpperCaseValidator</validator-id>
         </validator>
     </tag>
+    <tag>
+        <tag-name>toUpperRenderer</tag-name>
+        <component>
+            <component-type>com.github.beisser.gui.jsf.component.ToUpperRenderer</component-type>
+        </component>
+    </tag>
 </facelet-taglib>
