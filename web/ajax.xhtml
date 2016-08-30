@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<f:view contracts="#{contract.contract}">
+    <ui:composition template="/adminTemplate.xhtml">
+        <ui:define name="header">
+            <h3>Ajax Examples</h3>
+            <hr></hr>
+        </ui:define>
+
+        <ui:define name="content">
+            <h4>Store checkbox status</h4>
+            <h:form id="form">
+                <h:selectBooleanCheckbox id="displayed" value="#{ajaxController.displayed}"
+                                         valueChangeListener="#{ajaxController.displayedChanged}">
+                    <f:ajax render="toReRender"/>
+                </h:selectBooleanCheckbox>
+            </h:form>
+
+            <h:panelGroup id="toReRender">
+                <h:outputText id="outbox" value="#{ajaxController.displayed}"></h:outputText>
+            </h:panelGroup>
+
+            <hr></hr>
+            <h4>Ajax-Area</h4>
+            <h:form id="form2">
+                <f:ajax render="outbox2 outbox3" event="keyup">
+                    <h:panelGrid columns="1">
+                        <h:inputText id="firstName" value="#{ajaxController.firstName}"/>
+                        <h:inputText id="lastName" value="#{ajaxController.lastName}"/>
+                    </h:panelGrid>
+                </f:ajax>
+                <h:panelGrid columns="2">
+                    <h:outputLabel for="outbox2" value="Firstname"/><h:outputText id="outbox2" value="#{ajaxController.firstName}"/>
+                    <h:outputLabel for="outbox3" value="Lastname"/><h:outputText id="outbox3" value="#{ajaxController.lastName}"/>
+                </h:panelGrid>
+            </h:form>
+
+        </ui:define>
+    </ui:composition>
+</f:view>
+</html>
