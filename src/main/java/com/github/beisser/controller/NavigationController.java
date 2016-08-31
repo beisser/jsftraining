@@ -32,6 +32,10 @@ public class NavigationController {
         return "basic/index.xthml?faces-redirect=true";
     }
 
+    public String processAjaxExamples() {
+        return "ajax.xhtml?faces-redirect=true";
+    }
+
     public String processWizard() {
         return "wizard";
     }
