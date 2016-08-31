@@ -28,6 +28,13 @@
         </component>
     </tag>
 
+    <tag>
+        <tag-name>ajaxStatus</tag-name>
+        <component>
+            <resource-id>beisser/ajaxStatus.xhtml</resource-id>
+        </component>
+    </tag>
+
     <!-- tag for classic custom component -->
     <tag>
         <tag-name>toUpperRenderer</tag-name>

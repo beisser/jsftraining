@@ -1,0 +1,25 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
+
+    <!-- component attributes -->
+    <cc:interface>
+        <cc:attribute name="text" default="loading..."></cc:attribute>
+    </cc:interface>
+
+    <!-- component implementation -->
+    <cc:implementation>
+        <h:outputScript name="jsf.js" library="javax.faces" target="head"/>
+        <h:outputScript name="status/status.js" library="js" target="head"/>
+
+        <script type="text/javascript">
+            registerCallback('#{cc.clientId}:msg');
+        </script>
+
+        <div id="#{cc.clientId}:msg" style="display: none;">
+            #{cc.attrs.text}
+        </div>
+    </cc:implementation>
+</ui:composition>

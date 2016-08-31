@@ -1,0 +1,2801 @@
+###########################
+###### JSF Basics #########
+###########################
+
+1. Entwicklungsumgebung einrichten (IDEA)
+- New Project -> Java Enterprise -> JSF 
+	* Project SDK: 1.8
+	* Java EE Version: EE 7
+	* Application Server Tomcat (Vorher Tomcat auf dem System installieren und den Pfad dahin der IDE mitteilen)
+	* JSF (Mojarra)
+- Name vergeben 
+- Finish 
+- Run Configurations -> Neuer Tomcat-Server 
+	* bei Deployment-Reiter: Neues Artefakt dazu 
+	* bei Server-Reiter: 
+		On Update action: Update classes and resources
+		On frame deactivation: Update classes and resources
+- ProjectStructure -> Artefacts -> Unten rechts auf "Fix" und "Add Mojarra"
+- Alternativ Project mit Glassfish konfigurieren
+	* in IDEA-Server erstellen 
+	* unter ProjectStructure > Module (Auf Profjektnamen klicken) > Glassfish & Glassfish JSF hinzufügen 
+		-> zudem Tomcat entfernen (falls vorhanden)
+	* wichtig: falls noch Weld CDI-Implementierung in pom.xml oder web.xml ist muss das jeweilse entfernt werden
+
+2. Allgemeines / Bestandteile von JSF 
+	- Webseiten mit Facelet-Komponenten 
+	- Deployment-Beschreibung (web.xml)
+	- Application-Konfiguration (faces-config.xml)
+	- Komponenten, Validatoren, Konverter
+	- Verwendete Libs (z.B. JDBC-Treiber etc.) müssen in WEB-INF/lib abgelegt werden 
+	
+3. JSF-Tag Lib 
+- JSF kommt mit Tags die im .xhtml eingebunden werden können und die später Html erstellen 
+- um diese Tags verwenden zu können müssen die Tag-Libs in den Views eingebunden werden 
+	<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+	-> hier "h" als Namensraum für Html festgelegt
+- ein .xhtml View kann neben den JSF-Tags auch ganz normales html enthalten
+	-> somit können CSS, JS etc. eingebunden / verwendet werden 
+- WICHTIG: alle Tags müssen ein eindeutiges ID-Attribut haben (JSF arbeitet mit diesem um die Komponenten wiederzuerkennen)
+- JSF identifiziert jede Komponente über das id-Attribut 
+	> setzt man das id-Attribut nicht selbst, vergibt JSF eine id
+	> ist die Komponente in einen "Naming-Container" eingebettet (z.B. Form, Table etc) wird die id dieses Containers der id 
+	  der Komponente vorangestellt und mit deinm ":" davon getrennt (z.B: formId:compId)
+		-> will man dieses Verhalten nicht so kann man bei den Naming-Containern das Attribut "prependId" auf false setzen
+- JSF-Tags: 
+	
+	> Komponeten implementieren jeweils bestimmte Interfaces wodurch sie sich grob in 3 Gruppen einteilen lassen 
+		a.) Interface ActionSource2 (ermöglichen das Setzen von action und actionListener)
+		b.) Interface ValueHolder (können einen Wert/ Value besitzen, welcher jedoch nicht bearbeitbar ist z.B. h:outputText)
+		c.) Interface EditableValueHolder (können Wert/ Value besitzen der zudem veränderbar ist und lösen Value-Change-Event aus z.B. h:inputText)
+
+	3.1. Html-Tags (speziell für den HTML-Renderer): xmlns:h="http://xmlns.jcp.org/jsf/html"
+	
+		3.1.1. h:dataTable
+		> ermöglicht es eine Tabelle mit Collection-Daten zu belegen 
+		> Beispiel 
+			<!-- team ist die Variable die innerhalb einer Tabellenzeile verwendet werden kann -->
+			<!-- user.teams ist die Variable die die Collection enthält -->
+			<h:dataTable value="#{user.teams}" var="team">
+				<!-- einzelne Spalten definieren; die Rows werden automatisch erzeugt -->
+				<h:column>
+					<!-- Überschrift Festlegen -->
+					<f:facet name="header">Team Name</f:facet>
+					#{team}
+				</h:column>
+			</h:dataTable>
+		> CSS-Klassen für die Tabellenkomponenten werden als Attribute in der Komponente h:dataTable angegeben
+			* styleClass="class1" (für die Tabelle an sich)
+			* headerClass="class2" (für die Spaltennamen)
+			* rowClass="class3" (für die Zeilen)
+		> nur Ausschnitte einer Sammlung anzeigen über die folgenden Attribute von h:dataTable
+			* first (Erster Eintrag der angezeigt werden soll)
+			* rows (wieviele Einträge ab dem erster sollen angezeigt werden)
+	
+		3.1.2. h:button, h:link 
+		- Button bzw. Link der kein Form-Tag außenrum benötigt 
+			-> super für GET-Links, da commandLink und commandButton immer POST absenden
+			-> nur auf diese Weise können sichere Links erstellt werden, auf die ein Lesezeichen gesetzt werden kann 
+		- wichtige Attribute: 
+			* outcome="next_page" (leitet zu next_page.xhtml) weiter	
+		- An den Link können zusätzlich auch View-Parameter angehängt werden, die durch Kind-Elemente vom Typ f:param sind 
+			<h:link outcome="/user.xhtml" value="Hier lang">
+				<f:param name="id" value="777"/>
+			</h:link>
+		-> um die View-Parameter eines GET-Links auszulesen und zu verarbeiten (vgl. 17. f:viewParam und f:viewAction)
+			
+		3.1.3. h:outputLink 
+		- Erzeugt einen Link (a href)
+		- wichtige Attribute: 
+			* value="next_page.xhtml" (wichtig! hier muss die xhtml-Extension angegeben werden!)
+		- Über Kindtag f:param kann man ViewParameter anhängen 
+		- Beispiel: 
+			<h:outputLink value="next_page.xhtml">
+				Next page
+				<f:param action="getParam" value="test"/>
+			</h:outputLink>
+		
+	
+		3.1.4. h: panelGrid
+		- Erzeugt eine html-Tabelle um die in der Komponente h:panelGrid enthaltenen anderen Komponenten anzuordnen 
+			-> die anderen Komponenten werden einfach als KindTags angegeben 
+			-> über das Attribut "columns" kann angegenen werden nach wie vielen Elementen jeweilse eine neue Zeile 
+			   erstellt werden soll 
+				<h:panelGrid columns="3">	// hier nach 3 Komponenten neue Zeile 
+		- will man mehrere Komponenten in eine Zelle des panelGrid packen so kann man h:panelGroup verwenden 
+				
+		3.1.5. c:forEach 
+		- Foreach-Schleifen für Maps 
+			<!-- h ist die Variable die innerhalb der Schleife verwendet werden kann -->
+			<!-- #{header} ist die Variable die die Collection enthält -->
+			<c:forEach items="#{header}" var="h">
+                #{h.key}
+                #{h.value}
+            </c:forEach>
+		
+		3.1.6 h:form 
+		> für Form-Container
+		> wichtige Attribute: 
+			* prependId="false" (normalerweise bekommen die Ids aller Kind-Komponenten des Forms die Form-Id vorangestellt z.B. form-id:username)
+				-> ist das Attribut auf false gesetzt wird die Formular-Id nicht vorangestellt 
+	
+		3.1.7. h:outputLabel
+		> Label für ein Formular-Element 
+		> wichtige Attribute: 
+			* for="elementId" (Legt fest für welches Formular-Element das Label sein soll)
+			
+		3.1.8. h:inputText
+		> für Text Input-Field
+		
+		3.1.9. h:selectOneMenu
+		> Dropdown 
+		> Optionen können gesetzt werden mit: 
+			* Hardcoded als KindTag "<f:selectItem itemValue="" itemLabel="">"
+			* Dynamisch von einer Managed Bean 
+				# in der Bean eine Liste erstellen (z.B. ArrayList)
+				# in der Bean _nur_ Getter erzeugen (keinen Setter)
+				# als KindTag "<f:selectItems value="#{beanName.availableOptions}"></f:selectItems>"
+		
+		3.1.10. h:commandButton
+		> Submit-Button (benötigt ein Form-Tag)
+		> wichtige Attribute: 
+			* action="goTo": legt fest wohin weitergeleitet werden soll (hier goTo.xhtml); kann auch über Expression-Language gesetzt werden 
+		> WICHTIG: die URL ändert sich standartmäßig nicht wenn man auf den Button klickt, sondern bleibt die des ursprünglichen Requests 
+			-> will man dass sich die URL ändert muss man einen Parameter anhängen 
+			-> action="goTo?faces-redirect=true"
+			
+		3.1.11. h:selectOneRadio 
+		> Radio Button 
+		> Optionen können gesetzt werden mit: 
+			* Hardcoded als KindTag "<f:selectItem itemValue="" itemLabel="">"
+			* Dynamisch von einer Managed Bean 
+				# in der Bean eine Liste erstellen (z.B. ArrayList)
+				# in der Bean _nur_ Getter erzeugen (keinen Setter)
+				# als KindTag "<f:selectItems value="#{beanName.availableOptions}"></f:selectItems>"
+				
+		3.1.12. h:selectManyCheckbox
+		> Checkbox
+		> da mehrere Optionen ausgewählt werden können muss die Eigenschaft im Entity ein Array sein 
+			z.B. private String[] teams;
+		> Optionen können gesetzt werden mit: 
+			* Hardcoded als KindTag "<f:selectItem itemValue="" itemLabel="">"
+			* Dynamisch von einer Managed Bean 
+				# in der Bean eine Liste erstellen (z.B. ArrayList)
+				# in der Bean _nur_ Getter erzeugen (keinen Setter)
+				# als KindTag "<f:selectItems value="#{beanName.availableOptions}"></f:selectItems>"
+		> die Ausrichtung der Checkboxen werden über das Attribut "pageDirection" gesetzt
+	
+		3.1.13. h:inputHidden
+		> verstecktes Formular-Element
+		
+		3.1.14. h:inputFile 
+		> wird verwendet zum File upload 
+		> dazu wird benötigt: 
+			* das Formular muss enctype="multipart/form-data" setzen: <h:form id="userForm" enctype="multipart/form-data">
+			* die Komponente: <h:inputFile value="#{user.file}" required="true"></h:inputFile>
+			* die Bean benötigt eine Eigenschaft image vom Typ "javax.servlet.http.Part"
+				-> Part ermöglicht den Zugriff auf viele hilfreiche Getter z.B. 
+					# Content-Typ
+					# Input-Stream (von dem man den Content bekommt)
+					# Name 
+					# Größe 
+			* um weiterarbeiten zu können benötigt man nun "apache.commons.io" welches zum Projekt hinzugefügt werden muss 
+				> dazu in IDEA auch File > ProjectStructure > Libraries > Hinzufügen > von Maven > nach commons-io suchen 
+				> WICHTIG: wie stehts muss auch dsa Artefakt wieder gefixt werden (bzw. commons-io hinzugefügt werden)
+			* um mit dem InputStreamer weiterarbeiten zu können muss dieser in ein byte-Array umgewandelt werden 
+				byte[] content = IOUtils.toByteArray(user.getImage().getInputStream());
+				
+		3.1.15. h:outputText, h:outputFormat 
+		> outputFormat ermöglicht es Text mit Platzhaltern zu formatieren (vgl. printf)
+			-> Beispiel 
+				<h:outputFormat value="Willkommen zurück {0}{1}">
+					<f:param value="John"/>			// erster Parameter 
+					<f:param value="Doe"/>			// zweiter Parameter 
+				</h:outputFormat>
+		> WICHTIG: alle Ausgabekomponenten escapen defaultmäßig! will man das nicht muss das Attribut "escape" auf false gesetzt werden 
+		
+		3.1.16. h:message, h:messages 
+		> Tags um JSF-Nachrichten anzuzeigen 
+		> damit JSF-Nachrichten beim nächsten Request angezogen werden müssen sie vom Typ "FacesMessage" sein 
+		> Nachrichten können mir einem Schweregrad versehen werden (z.B. warn, info, error)
+			-> je nach Schweregrad kann man eine CSS-Klasse hinterlegen (z.B. warnClass, infoClass, errorClass)
+				
+	3.2. Core-Tags (unabhängig vom tatsächlichem Renderer): xmlns:f="http://xmlns.jcp.org/jsf/core"
+	> sie setzen oder verändern Attribute von Komponenten in die sie als Kindelement eingesetzt sind 
+		* f:actionListener (fügt ActionListener zu Komponente hinzu)
+		* f:ajax (fügt Ajax zu View hinzu)
+		* f:attribute (fügt Attribut zu Komponente hinzu)
+		* f:convertXxx (fügt Converter zu Komponente hinzu)
+		* f:event (fügt System-Event-Listener zu Komponente hinzu)
+		* f:facet (fügt Komponente hinzu, welche Elternkomponente modifiziert vgl. Header bei Tabelle)
+		* f:metaData (fügt Bereich zum Einfügen von f:viewParam und f:viewAction hinzu)
+		* f:param (fügt Parameter zu Komponenten wie h:outputFormat hinzu)
+		* f:passThroughAttribute (fügt passThroughAttribute zu Komponente hinzu z.B. für eigene data-Attribute)
+		* f:phaseListener: (fügt PhaseListener zu View hinzu)
+		* f:resetValues (setzt Einfagen zurück)
+		* f:selectItem (definiert Optionen in einem Dropdown)
+		* f:validateXxx (fügt Validator zu Komponente hinzug) 
+		* f:valueChangeListener (fügt valueChangeListener zu Komponente hinzu)
+		* f:view (Root Komponente: wichtige Attribute sind z.B. locale um Locale zu setzen oder beforePhase und afterPhase um Phase-Listener zu registrieren)
+		* f:viewAction (fügt viewAction hinzu, welche vor dem Rendern des Views aufgerufen wird)
+		* f:viewParam (fügt View Parameter zu View hinzu)
+		
+	3.3. Composite-Components-Tags: xmlns:cc="http://xmlns.jcp.org/jsf/composite
+	> cc:interface: Schnittstelle der Komponete nach außen (bzw. welche Attribute die Komponente haben soll)
+	> cc:implementation: Implementierung der Komponente (kann aus beliebigen HTML oder JSF-Tags zusammengesetzt sein)
+	> cc:insertChildren: Alle Inhalten zwischen den Tags der Komponente werden damit in die Komponente eingefügt 
+	
+		
+	3.3. UI-Tags: xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+				
+		3.3.1. ui:repeat
+		> ermöglicht das loopen über eine Collection oder Array 
+		> z.B. ul 
+			<ul>
+				<!-- team ist die Variable die innerhalb der Schleife verwendet werden kann -->
+				<!-- user.teams ist die Variable die die Collection enthält -->
+				<ui:repeat value="#{user.teams}" var="team">
+					<li>#{team}</li>
+				</ui:repeat>
+			</ul>
+			
+		3.3.2. ui:graphicImage
+		> ermöglicht das anzeigen eines Bildes 
+		> wichtige Attribute: 
+			* url (Pfad zum Image; ohne "/" am anfang relativ, mit "/" am Anfang absolut)
+				-> statt der URL kann auch einfach der Name einer Resource angegeben werden 
+				
+4. Managed Bean 
+
+	4.1. Allgemeines zu Managed Beans 
+	- Managed Bean ist eine normale Java-Klasse
+			* hält z.B. Formulardaten und Buisness-Logik 
+			* wird von gemanaged (deswegen "Managed Bean") d.h. 
+				# Instanzierung und Löschung der Klassen 
+				# Festlegung der Lebensdauer 
+				# Bereitstellung über Expression Language
+		- Best Practice: Managed Bean sollte eine Backing Bean sein und damit eine Vermittlerrolle zwischen View und Model sein 
+			* Backing Beans (Formdaten, Action-Methoden, Backend-Prozeduren, z.B. Kommunikation mit einem DbService, Navigation)	
+				-> Backing Bean dient also als eine Art Controller und hält die Logik der Route 
+				-> sie hat auch eine Eigenschaft vom Typ <Entity> um auf diese zugreifen zu können 
+			* Model / Entity (das eigentliche Model; muss unter Umständen gar keine ManagedBean sein, sondern nur JavaBean)
+				-> Model ist dann frei von GUI-Logik (da diese von der Backing-Bean übernommen wird)
+		- Wie muss ein Managed Bean aussehen: 
+			> Konstruktor darf keine Argumente entgegennehmen 
+			> Zugriff auf Eigenschaften über Getter und Setter
+				-> eine Eigenschaft muss nicht Getter UND Setter haben 
+				-> je nachdem was vorhanden ist, ist die Eigenschaft nur lesbar (Getter) oder nur schreibbar (Setter)
+			> @ManagedBean oder @Named Annotation muss gesetzt sein (@Named ist best practice)
+				@ManagedBean || @Named
+				public class User {
+					private String firstName;
+					...
+				-> alternativ besteht auch die Möglichkeit eine Managed Bean über faces-config.xml zu definieren 
+					<managed-bean>
+						<managed-bean-name>user</managed-bean-name>
+						<managed-bean-class>com.github.beisser.model.User</managed-bean-class>
+						<managed-bean-scope>session</managed-bean-scope>
+					</managed-bean>
+		- Managed Beans und Formulare 
+			> Managed Beans können mit einem Formular verbunden werden 
+			> Die Daten aus dem Formular werden stets mit der Bean abgeglichen 
+			> Somit kann in einem anderen View über die Bean wieder auf die Formulardaten zugegriffen werden
+		- Typische Aufgaben einer Backing Bean 
+			a.) Buisness-Logik ausführen und Navigation übernehmen 
+			> dazu einfach in der Backing Bean eine public Methode erstellen die die Buisness-Logik übernimmt und 
+			  anschließend die nächste Route als String zurückgibt 
+			> Beispiel:
+				public String navigate() {
+					if (true) {
+						// steht für route_a.xhtml
+						return "route_a";
+					}
+					// steht für route_b.xhtml
+					return "route_b";
+				}
+				-> im View wird dann wie gewohnt über Expression-Language die Methode der Bean aufgerufen
+					
+	4.1. JSF-Managed Beans 
+	- Managed Bean Scopes
+		> Managed Beans können verschiedene Scopes haben, welche die Lebenszeit der Bean bestimmen 
+			* @RequestScoped (DEFAULT SCOPE; Bean wird bei jedem Request neu erstellt, z.B. um Form-Daten zu übermitteln)
+			* @SessionScoped (Bean wird einmalig pro Browser-Session erzeugt; jeder User hat eine eigene Session, super für User-spezifische Daten 
+							  wie Sprache, User-Daten)
+			* @ApplicationScoped (Bean wird einmal für die Application erstellt und von allen Usern geteilt; am besten bei Datenbank-Service-Klassen)
+			* @ViewScoped (Bean bleibt solange bestehen wie der Benutzer auf der Seite bleibt; super für Ajax)
+			* @FlowScoped (Bean bleibt bestehen solange der Benutzer auf einer bestimmten Sammlung von Seiten ist; super für Wizards)
+			* @FlashScoped (Bean lebt bis zum nächsten Redirect)
+			* @NoneScoped (Bean wird nicht von JSF erstellt; gut für Beans die in Beziehung zu einem anderen stehen; 
+						   Die Bean wird dann von dem anderen Bean erstellt und lebt so lange wie die andere Bean)
+	- Events für die man in ManagedBeans Methoden definieren kann 
+		a.) @PostConstruct (wird ausgeführt wenn JSF ein Objekt der Klasse UND alle durch Dependency Injection injizierten Abhängigkeiten erzeugt hat)
+			-> z.B. 
+				@PostConstruct
+				public void init() {
+					// Code here 
+				}
+			-> tut auf den ersten Blick das gleiche wie ein Konstruktor 
+			-> Unterschied zeigt sich jedoch sobald Dependency Injection ins Spiel kommt; Besitzt das Objekt Abhängigkeiten zu anderen Objekten 
+			   werden diese durch Dependency Injection injiziert, jedoch kann man auf diese Abhängigkeiten nocht nicht im Konstruktor zugreifen 
+			-> PostConstruct wird hingegen erst gefeuert, wenn ALLE (auch die Abhängigkeiten) erzeugt wurden 
+			-> somit kann man in der @PostConstruct-Methode im Gegensatz zum Konstruktor auch auf Abhängigkeiten zugreifen
+		b.) @PreDestroy (wird ausgeführt bevor das Objekt zerstört wird; gut für Aufräumarbeiten)
+			-> z.B. 
+				@PreDestroy
+				public void clean() {
+					// Code
+				}
+			
+	4.2. CDI-Managed Beans (Best practice)
+	- JSF-Manged Beans (Annotation von faces.bean-Paketen) werden bald deprecated sein 
+	- deshalb sollte man schon jetzt auf CDI-Managed Beans setzen 
+	- Dazu muss das Projekt erst mit CDI-Support ausgestattet werden 
+		> dazu in IDEA Rechtsklick auf Project > Add Framework support > CDI: Contents and Dependency Injection 
+		> die IDE lädt die notwendigen JARS in das lib Verzeichnis und erstellt web/WEB-INF/beans.xml 
+		> nun muss noch in der web.xml ein Listener hinzugefügt werden 
+			<listener>
+				<listener-class>org.jboss.weld.environment.servlet.Listener</listener-class>
+			</listener>
+		> dann muss noch JBoss Weld zum Artefakt hinzugefügt werden 
+			File > ProjectStructure > Artefacts > Fix unten rechts
+	- Folgende neue Annotationen ersetzen die "alten"
+		@javax.inject.Named (ersetzt @javax.faces.bean.ManagedBean)
+		@javax.enterprise.context.ApplicationScoped (ersetzt @javax.faces.bean.ApplicationScoped)
+		@javax.enterprise.context.SessionScoped (ersetzt @javax.faces.bean.SessionScoped)
+			-> muss Serializable implementieren
+		@javax.enterprise.context.RequestScoped (ersetzt @javax.faces.bean.RequestScoped)
+		@javax.enterprise.context.Dependend (ersetzt @javax.faces.bean.NoneScoped)
+			-> DependendScoped ist Default in CDI
+	- Wichtige Annotation speziell in CDI 
+		@javax.enterprise.context.ConversationScoped: wie Session nur innerhalb eines Browser-Tabs
+			-> muss Serializable implementieren
+		@javax.inject.Singleton (nur eine Instanz der Klasse wird erzeugt)
+
+	
+5. Expression Language (EL)
+- Features 
+	* Verbindung von Komponenten (View) mit Eigenschaften von ManagedBeans (Geschäftslogik) -> (Lesen (über Getter) und Schreiben(überSetter))
+	* Aufruf von Methoden in ManagedBeans 
+	* Verwendung von Operatoren erlaubt 
+	* Möglichkeit der Verbindung mit einer Zeichenkette -> ... value="Hallo #{user.username}"
+- Expression-Language ist in ganzer JSF-Anwendung verfügbar: z.B. 
+	> Views 
+	> Config-Files (z.B. faces-config.xml)
+- in den Views kann über EL 
+	a.) auf die Eigenschaften einer Managed Bean zugegriffen werden 
+		#{user.firstName}
+	b.) auf andere Methoden zugegriffen werden 
+		#{userBackingBean.save()}
+	c.) über Parameter eine aktuell verwaltete Bean an eine Backing Bean oder einen anderen View übergeben werden  
+		z.B. bei CREATE einer CRUD wird das neue Objekt an einen Controller weitergegeben 
+			<h:commandButton value="Save User" styleClass="btn btn-default" action="#{userController.addUser(user)}"></h:commandButton>
+- Wichtig: 
+	* der Name der Bean in der EL mit einem Kleinbuchstaben beginnen 
+	* Zugriff auf eine Eigenschaft über den Eigenschaftsnamen (nicht den Getter oder Setter)
+- Mit EL können Eigenschaften gelesen oder gesetzt werden je nachdem in welchem Kontext die EL verwendet wird  
+	a.) Schreiben
+		<h:inputText value="#{user.firstName}"
+		-> JSF wird dann automatisch den Setter aufrufen
+	b.) Lesen 
+		<h:outputText value="#{user.firstName}"
+		-> JSF wird dann automatisch den Getter aufrufen 
+- Über EL kann man auf jeder Seite auf bestimmte implizite Objekte zugreifen z.B. 
+	> initParam (Zugriff auf Parameter-Map der Application und damit der Kontextparameter)
+	> cookie (Zugriff auf Cookie Map)
+	> header (Zugriff auf Request-Header-Map des ExternalContext)
+	> session (Zugriff auf das Session Objekt)
+	> request (Zugriff auf Request Objekt)
+	> requestScope (Zugriff auf RequestMap des ExternalContext)
+	> viewScope 
+	> resource (Zugriff auf die Resourcen CSS, Images, JS)
+	> applicationScope 
+	> sessionScope (Zugriff auf Session Map des ExternalContext)
+	> param (Zugriff auf Request-Parameter Map des ExternalContext)
+	> facesContext (Zugriff auf FacesContext)
+	> flash
+	> etc.
+- In EL kann man Bedingungen verwenden; z.B. nützlich wenn man ein Element in Abhängigkeit anzeigen lassen will oder nicht
+	<h:outputLabel value="Label hier" rendered="#{1 == 2}"/>
+		
+6. Form-Validierung und Konvertierung 
+- Fehler-Meldungen anzeigen: 
+	> h:messages -> zeigt alle verfügbaren Validierungs-Fehler an 
+		-> mögliche Attribute sind: 
+			* styleClass: CSS Klasse angeben
+	> h:message -> zeigt Fehler-Meldung für ein bestimmtes Element an 
+		-> dazu muss mit dem Attribut "for" die Id des Elements angegeben werden 
+			<h:inputText id="firstName" ...
+			<h:message for="firstName">
+	> um eigene Fehlermeldungen zu definieren gibt es im zu validierenden Element das Attribut "validatorMessage"
+
+	6.1. Validierung 
+	- wichtig: JSF validiert nur gerenderte Komponenten 
+		-> will man also eine Komponente nicht validiert haben, so muss das render-Attribut auf false gesetzt sein 
+	
+		6.1.1. Required-Validierung 
+		> Möglichkeiten zur Validierung 
+			a.) in den Tags selbst 
+				<h:inputText ... label="First Name" required="true" requiredMessage="Feld darf nicht leer sein">
+				-> Label wird bei der Ausgabe der Validierungs-Fehler-Nachricht verwendet 
+				-> requiredMessage ermöglicht die Eingabe einer eigenen Fehlermeldung
+			b.) als Kindelement der Komponente die validiert werden soll 
+				<h:inputText ...>
+					<f:validateRequired></f:validateRequired>
+				</h:inputText>
+				
+		6.1.2. Zahlen-Range validieren 
+		> Möglichkeiten Validierung 
+			a.) als Kindelement der Komponente die validiert werden soll 
+				<h:inputText ...>
+					<f:validateLongRange minimum="0" maximum="10"></f:validateLongRange>
+				</h:inputText>
+	 
+		6.1.3. String-Länge validieren 
+		> Möglichkeiten Validierung 
+			a.) als Kindelement der Komponente die validiert werden soll 
+				<h:inputText ...>
+					<f:validateLength minimum="5" maximum="5"></f:validateLongRange>
+				</h:inputText>
+		
+		6.1.4. Regex-Validierung
+		> Möglichkeiten Validierung 
+			a.) als Kindelement der Komponente die validiert werden soll 
+				<h:inputText ...>
+					<f:validateRegex pattern="\d{3}-\d{3}"></f:validateRegex>
+				</h:inputText>
+				
+		6.1.5. Eigene Validatoren schreiben 
+		> Möglichkeiten Validierung 
+			a.) Eigene Validator-Klasse erstellen  
+			@FacesValidator("com.github.beisser.validator.LowerCaseValidator")
+			public class LowerCaseValidator implements Validator{
+				// o ist der Wert der zu validieren ist
+				@Override
+				public void validate(FacesContext facesContext, UIComponent uiComponent, Object o) throws ValidatorException {
+					if (o == null) {
+						return;
+					}
+
+					String data = o.toString();
+
+					if (!data.equals(data.toLowerCase())) {
+						// Eigene Fehlermeldung definieren 
+						// muss Instanz von FacesMessage sein, damit die h:message-Tags diese erkennen können
+						FacesMessage message = new FacesMessage("Alles muss klein geschrieben werden");
+						throw new ValidatorException(message);
+					}
+				}
+			}			
+			-> wichtig ist die Annotation @FacesValidator mit der Angabe der Id, welche später in den JSF-Pages verwendet werden kann 
+		> schlägt Validierung fehl muss die validate() eine ValidatorException werfen (ansonsten gibt sie nichts zurück)	
+		> Verwendung in JSF-Pages dann so: 
+			<h:inputText ...>
+				<f:validator validatorId="com.github.beisser.validator.LowerCaseValidator"></f:converter>
+			</h:inputText>
+		> Gruppen-Validierungen 
+			* immer dann notwendig, wenn die Werte mehrerer Komponenten in Kombination validiert werden müssen 
+			* der Validator muss dann mit der LETZTEN Komponente verknüpft werden um auf die Werte aller anderen zugreifen zu können 
+			
+		6.1.6. Alternative Validierung mit Annotationen 
+		> Validierung kann auch über Beans selbst geschehen indem man Annotationen verwendet 
+			-> dazu muss Hibernate Validator V4 in das Projekt integriert werden (über Maven)
+		> Beispiel: 
+			@Size(min = 2, max = 10)
+			String username;
+		> wichtige Annotationen
+			@Size(min = ?, max = ?)
+			@NotNull / @Null 
+				-> wichtig: dazu muss folgende Einstellung in web.xml gemacht werden, weil JSF standardmäßig leere Eingaben einfach ignoriert  
+					<context-param>
+						<param-name>javax.faces.INTERPRET_EMPTY_STRING_VALUES_AS_NULL</param-name>
+						<param-value>true</param-value>
+					</context-param>
+			@AssertFalse / @AssertTrue
+			@DecimalMin / @DecimalMax    
+				-> Element muss kleiner oder gleich / größer oder gleich dem angegebenen Wert sein 
+			@Digits(integer=2,fraction=2)
+				-> integer und fraction geben die maximalen Vor- und Nachkommastellen an 
+			@Future / @Past
+				-> muss Datum in der Zukunft sein / in der Vergangenheit seit 
+			@Max / @Min 
+				-> wie DecimalMax und DecimalMin nur vom Typ long 
+			@Pattern 
+		> Zusätzlich können natürlich auch eigene Validatoren / Annotationen erzeugt werden 
+			
+	6.2. Konvertierung 
+		- bei der Konvertiertung muss zwischen 2 Arten unterschieden werden: 
+			> implizite Konvertierung (wird von JSF selbst gemacht, wenn die Eigenschaft einer Managed Bean einen primitiven Datentyp hat)
+			> explizite Konvertierung; hier gibt es: 
+				* f:convertNumber
+				* f:convertDateTime
+				* f:converter
+	
+		6.2.1. f:convertNumber 
+		> wichtige Attribute 
+			* type="number" (ebenso möglich currency und percentage)
+			* currencyCode="EUR" (Währungs-Code)
+			* groupingUded="true" (Soll Seperator zwischen Tausender-Schritten sein)
+			* locale=
+			* minFractionDigits= (minimale Nachkommastellen)
+			* maxFractionDigits= (maximale Nachkommastellen)
+			* minIntegerDigits= (minimale Vorkommastellen)
+			* maxIntegerDigits= (maximale Vorkommastellen)
+			* pattern= (z.B. #.###,## für deutsches Zahlenformat)
+		> Möglichkeiten Konvertierung  
+			a.) als Kindelement der Komponente die konvertiert werden soll 
+				<h:inputText ...>
+					<f:convertNumber integerOnly="true" maxIntegerDigits="2"></f:validateRegex>
+				</h:inputText>	
+				
+		6.2.2. f:convertDateTime
+		> wichtige Attribute 
+			* pattern="yyyy-m-d"
+			* locale="de_DE"
+			* timezone="GMT"
+		
+		6.2.3. f:converter 
+		> Eigener Converter, den man geschrieben hat 
+			-> wichtig: Dieser Converter muss sowohl bei der Eingabe- als auch bei der Ausgabe-Komponente registriert werden 
+		> Attribut "converterId" muss gesetzt sein und auf die eigene Converter-Klasse zeigen 
+		> Eigenen Converter schreiben 
+			@FacesConverter("com.github.beisser.converter.CustomConverter")
+			public class CustomConverter implements Converter {
+				@Override
+				public Object getAsObject(FacesContext facesContext, UIComponent uiComponent, String s) throws ConverterException {
+					return s.toUpperCase();
+				}
+
+				@Override
+				public String getAsString(FacesContext facesContext, UIComponent uiComponent, Object o) throws ConverterException {
+					String value = (String) o;
+					return value.toLowerCase();
+				}
+			}
+			-> sollte bei der Konvertierung ein Fehler auftreten, muss mein eine ConverterException werfen 
+			-> wichtig ist die Annotation @FacesConverter mit der Angabe der Id, welche später in den JSF-Pages verwendet werden kann 
+			-> zudem kann der Annotation noch der Parameter forClass mitgegeben werden, um einen Konverter für eine bestimmte Klasse global 
+			   zu registrieren 
+				@FacesConverter(value = "com.github.beisser.converter.ToUpperConverter",forClass = Date.class)
+		> Verwendung in JSF-Pages dann so: 
+			<h:inputText ...>
+				<f:converter converterId="com.github.beisser.converter.CustomConverter"></f:converter>
+			</h:inputText>
+		
+6. Resources (CSS, JS) einbinden 
+- Resources sind grundsätzlich unter "web/resources" abgelegt 
+	-> Problem: dieses Verzeichnis ist von außen zugänglich; will man das nicht so sollte man Resourcen-Ordner nach 
+		/WEB-INF/resources verschieben
+	-> dies muss JSF dann in der web.xml und dem Kontextparameter "javax.faces.WEBAPP_RESOURCES_DIRECTORY" mitgeteilt werden
+- 3 Möglichkeiten Resourcen aufzuösen: 
+	a.) h:outputXxx 
+	b.) über EL und implizites "resource"-Objekt (#{resource[libName:resourceName]})
+	c.) @ResourceDependency (wichtig für eigene Komponenten)
+	
+	6.1. CSS 
+	> ablegen der Stylesheets in "web/resources/css"
+	> im View muss das Stylesheet dann eingebunden werden mit 
+		<h:head>
+			<!-- Beispiel für ein main.css -->
+			<!-- library ist der Ordner unterhalb von "web/resources" -->
+			<h:outputStylesheet library="css" name="main.css"></h:outputStylesheet>
+		</h:head>
+		
+	6.2. JavaScript 
+		<h:head>
+			<!-- Beispiel für ein script.js -->
+			<!-- library ist der Ordner unterhalb von "web/resources" -->
+			<h:outputScript library="js" name="script.js"></h:outputScript>
+		</h:head>
+- Versionierung von Resourcen 
+	
+	
+7. Komplette CRUD-App mit Datenbank-Verbindung 
+
+	7.1. Konfiguration von Tomcat und der Datenbank 
+	- um mehrere Anfragen schnell bearbeiten zu können kann man Tomcat konfigurieren um mehrere Verbindungen gleichzeitig zur Datenbank aufzubauen
+		-> sog. Connection Pool (aka DataSource)
+	- Vorbereitungen: 
+		a.) JDBC-Treiber für die gewünschte Datenbank herunterladen (für MySql: http://dev.mysql.com/downloads) und das JAR-File in "WEB-INF/lib" ablegen  
+		b.) Datenbank-Verbindungs-Info in "META-INF/context.xml" hinterlegen (das ist ein File für Tomcat; hier kann man Datenbank-Konfiguration angeben)
+			<Context>
+
+				<Resource name="jdbc/users"												// der Name ist frei wählbar muss jedoch dann der Web-App im web.xml so mitgeteilt werden (so ne Art Alias)
+						  auth="Container" type="javax.sql.DataSource"					// Typ DataSource bedeutet Connection Pool 
+						  maxActive="20" maxIdle="5" maxWait="10000"					// Definition wieviele Connections es maximal geben darf (20) bzw. wie viele warten wenn nichts los ist (5)
+						  username="root" password="root"								// Datenbank Zugangsdaten 
+						  driverClassName="com.mysql.jdbc.Driver"						// Datenbank-Treiber (kompletten Namen)
+						  url="jdbc:mysql://localhost:3306/jsftraining"/>				// Url zur Datenbank 
+
+			</Context>
+		c.) Resource-Reference in "WEB-INF/web.xml" definieren um die Datenbank-Verbindung / den Connection Pool der Web-App als Resource zur Verfügung zu stellen 
+			<resource-ref>
+				<description>Users Datasource</description>					
+				<res-ref-name>jdbc/users</res-ref-name>									// der Name hier muss exakt der gleiche sein wie in "META-INF/context" angegeben 
+				<res-type>javax.sql.DataSource</res-type>								// Typ DataSource bedeutet Connection Pool 
+				<res-auth>Container</res-auth>
+			</resource-ref>
+		d.) nun kann in der Web-App auf den Connection Pool zugegriffen werden mit "Java Naming Directory Interface" (JNDI)
+			
+	
+	7.2. App-Aufbau (Best-Practive)
+	- Grundsätzlich sollte die Aufteilung so aussehen 
+		> Views (JSF-Pages) -> rufen Methoden der Baking Bean auf 
+		> Baking Bean (Controller) -> leitet die Methodenaufrufe der Views weiter an DAO und gibt Daten zurück an die Views (NIE vom Controller direkt auf Datenbank zugreifen!!!)
+		> DB DAO (Objekt das mit der Datenbank kommuniziert) -> muss ein Singleton sein, dass zudem die einzige Klasse ist die mit der Datenbank kommuniziert
+		> Datenbank kommuniziert NUR mit dem DAO 
+	
+	7.3. Wichtiger App-Code 
+	- JSF-Page 
+		> wichtig ist hier vor allem, dass die Daten vor dem Rendern des Views über eine Controller-Methode aus der Datenbank geladen und auf Objekte gemappt werden 
+			-> das Laden darf allerdings nicht über einen Getter erfolgen sondern über eine andere Methode kombiniert mit einem Event 
+			<f:metadata>
+				<f:event type="preRenderView" listener="#{userController.loadUsers()}"/>
+			</f:metadata>
+			-> hier gibt es im Controller eine Methode die die notwendigen Daten aus der Datenbank lädt und auf Objekte mappt 
+			-> diese Methode wird über einen "PreRenderView"-Event nur einmal vor dem Rendern des Requests aufgerufen (vgl. onLoad in Javascript)
+			-> Getter sollte man für das Laden nicht nehmen da diese von JSF automatisch öfter aufgerufen werden
+	- DAO: 
+		public class UserDAO {
+
+			// variable to store the current singleton instance
+			private static UserDAO instance;
+			// variable to store the dataSource / tomcat connection pool
+			private DataSource dataSource;
+			// name of the connection pool
+			private String jndiName = "java:comp/env/jdbc/users";
+
+			// implementing Singleton Pattern
+			// this method gives a handle to the only instance of the class
+			public static UserDAO getInstance() throws Exception {
+				if (instance == null) {
+					instance = new UserDAO();
+				}
+				return instance;
+			}
+
+			// method to get all users from the database
+			public List<User> getUsers() throws Exception {
+
+				// create empty array
+				List<User> users = new ArrayList<>();
+
+				Connection connection = null;
+				Statement statement = null;
+				ResultSet resultSet = null;
+
+				try {
+					// get a connection from the connection pool / dataSource
+					connection = _getConnection();
+
+					// sql code
+					String sql = "select * from users order by last_name";
+
+					// create and execute the sql code
+					statement = connection.createStatement();
+					resultSet = statement.executeQuery(sql);
+
+					// process result set from the database
+					while (resultSet.next()) {
+
+						// retrieve data from result set row
+						int id = resultSet.getInt("id");
+						String firstName = resultSet.getString("first_name");
+						String lastName = resultSet.getString("last_name");
+						String email = resultSet.getString("email");
+
+						User currentUser = new User(id,firstName,lastName,email);
+
+						// add it to the list of users
+						users.add(currentUser);
+					}
+
+					return users;
+				}
+				finally {
+					_close (connection, statement, resultSet);
+				}
+			}
+
+			public void addUser(User user) throws Exception {
+
+				Connection connection = null;
+				PreparedStatement statement = null;
+
+				try {
+					// get a connection from the connection pool
+					connection = _getConnection();
+
+					// prepared sql statement
+					String sql = "insert into users (first_name, last_name, email) values (?, ?, ?)";
+					statement = connection.prepareStatement(sql);
+
+					// set params
+					statement.setString(1, user.getFirstName());
+					statement.setString(2, user.getLastName());
+					statement.setString(3, user.getEmail());
+
+					statement.execute();
+				}
+				finally {
+					// clean up
+					_close(connection,statement,null);
+				}
+			}
+
+			public User getUser(int userId) throws Exception{
+				Connection connection = null;
+				PreparedStatement statement = null;
+				ResultSet resultSet = null;
+
+				try {
+					connection = _getConnection();
+
+					String sql = "select * from users where id=?";
+
+					statement = connection.prepareStatement(sql);
+
+					// set params
+					statement.setInt(1, userId);
+
+					resultSet = statement.executeQuery();
+
+					User fetchedUser = null;
+
+					// retrieve data from result set row
+					if (resultSet.next()) {
+						int id = resultSet.getInt("id");
+						String firstName = resultSet.getString("first_name");
+						String lastName = resultSet.getString("last_name");
+						String email = resultSet.getString("email");
+
+						fetchedUser = new User(id, firstName, lastName,
+								email);
+					}
+					else {
+						throw new Exception("Unable to find user with id: " + userId);
+					}
+
+					return fetchedUser;
+				}
+				finally {
+					_close(connection, statement, resultSet);
+				}
+			}
+
+			public void updateUser(User user) throws Exception{
+				Connection connection = null;
+				PreparedStatement statement = null;
+
+				try {
+					connection = _getConnection();
+
+					String sql = "update user "
+							+ " set first_name=?, last_name=?, email=?"
+							+ " where id=?";
+
+					statement = connection.prepareStatement(sql);
+
+					// set params
+					statement.setString(1, user.getFirstName());
+					statement.setString(2, user.getLastName());
+					statement.setString(3, user.getEmail());
+					statement.setInt(4, user.getId());
+
+					statement.execute();
+				}
+				finally {
+					_close(connection, statement,null);
+				}
+			}
+
+			public void deleteUser(int userId) throws Exception {
+
+				Connection connection = null;
+				PreparedStatement statement = null;
+
+				try {
+					connection = _getConnection();
+
+					String sql = "delete from users where id=?";
+
+					statement = connection.prepareStatement(sql);
+
+					// set params
+					statement.setInt(1, userId);
+
+					statement.execute();
+				}
+				finally {
+					_close(connection, statement,null);
+				}
+			}
+
+			// making the constructor private to force using getInstance to get the instance
+			private UserDAO() throws Exception{
+				// get the dataSource / Connection Pool and assign it the variable
+				dataSource = _getDataSource();
+			}
+
+			// method to access the dataSource provided by tomcat using jndi
+			private DataSource _getDataSource() throws NamingException {
+				Context context = new InitialContext();
+
+				DataSource theDataSource = (DataSource) context.lookup(jndiName);
+
+				return theDataSource;
+			}
+
+			// getting one connection from the connection pool / dataSource
+			private Connection _getConnection() throws Exception {
+				Connection connection = dataSource.getConnection();
+				return connection;
+			}
+
+			// clean up method
+			private void _close(Connection connection, Statement statement, ResultSet resultSet) {
+
+				try {
+					if (resultSet != null) {
+						resultSet.close();
+					}
+
+					if (statement != null) {
+						statement.close();
+					}
+
+					if (connection != null) {
+						connection.close();
+					}
+
+				} catch (Exception exc) {
+					exc.printStackTrace();
+				}
+			}
+		}
+	- Controller 
+		@ManagedBean
+		@SessionScoped
+		public class UserController {
+
+			private List<User> users;
+			private UserDAO userDAO;
+			private Logger logger = Logger.getLogger(getClass().getName());
+
+			public UserController() throws Exception {
+				users = new ArrayList<User>();
+				userDAO = UserDAO.getInstance();
+			}
+
+			public void loadUsers() {
+
+				users.clear();
+
+				try {
+
+					// get all users from database
+					users = userDAO.getUsers();
+
+				} catch (Exception exc) {
+					// send FacesMessage to next page to display errors
+					AppUtils.addErrorMessage(exc);
+				}
+			}
+
+			public String addUser(User user) {
+				try {
+					userDAO.addUser(user);
+				} catch(Exception e) {
+					AppUtils.addErrorMessage(e);
+				}
+				return "users";
+			}
+
+			// fetches the object, adding it to the request map, send it to updateUserForm
+			public String loadUser(int id) {
+				try {
+					User fetchedUser = userDAO.getUser(id);
+
+					// helper to add data to memory
+					ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
+
+					// add data to request
+					Map<String, Object> requestMap = externalContext.getRequestMap();
+					requestMap.put("user", fetchedUser);
+				} catch(Exception e) {
+					AppUtils.addErrorMessage(e);
+				}
+				return "updateUserForm";
+			}
+
+			public String updateUser(User user) {
+				try {
+					userDAO.updateUser(user);
+				} catch(Exception e) {
+					AppUtils.addErrorMessage(e);
+				}
+				return "users";
+			}
+
+			public String deleteUser(int id) {
+				try {
+					userDAO.deleteUser(id);
+				} catch(Exception e) {
+					AppUtils.addErrorMessage(e);
+				}
+				return "users";
+			}
+
+			public List<User> getUsers() {
+				return users;
+			}
+
+			public void setUsers(List<User> users) {
+				this.users = users;
+			}
+
+		}
+	- Utils-Klasse um FacesMessages zu senden 
+		public class AppUtils {
+			public static void addErrorMessage(Exception exc) {
+				FacesMessage message = new FacesMessage("Error: " + exc.getMessage());
+				FacesContext.getCurrentInstance().addMessage(null, message);
+			}
+		}
+		-> <h:messages> muss auf der JSF-Page existieren 
+		
+	
+8. Architektur und Request-Life-Cycle 
+- Architektur: MVC 
+	- Request zu Controller (JSF Faces Servlet)
+		* Controller kann von der faces-config lesen 
+		* ist für das Routing auf eine bestimmte .xhtml-Seite zuständig
+		* kann auf Beans zugreifen 
+	- Controller routet zu einer bestimmten .xhtml-Seite 
+		* .xhtml-Seite hat ebenfalls Zugriff auf Beans 
+	- .xhtml-Seite gibt die Response zurück 
+- Request-Life-Cycle 
+	> Request 
+	> Restore View 
+		* Komponentenbaum wird aufgebaut 
+		* falls er auf dem Server oder auf dem Client gespeichert ist dann wird er von da geladen)
+		* springt bei initialem Aufruf sofort zu Response 
+	> Apply Request Values 
+		* Formulardaten werden an Komponenten gebunden 
+		* dabei wird der Wert in die Eigenschaft submittedValue eingetragen 
+			-> noch nicht in Value-Eigenschaft, da Validierung etc. ja fehlschlagen kann, und der alte Wert dann benötigt wird 
+	> Konvertierung und Validierung der Komponentendaten 
+		* nach erfolgreicher Konvertierung und Validierung wird der Wert in die Value-Eigenschaft der Komponente geschrieben
+		* Wenn sich der alte Wert vom neuen Wert unterscheidet wird ein Value-Change-Event ausgelöst (vgl. 16.2. ValueChangeListener)
+		* Wenn Konvertierung oder Validierung fehlschlägt geht es gleich mit Response weiter 
+	> Schreiben der Komponentendaten in die Eigenschaften der Managed Beans 
+		* dazu werden die entsprechenden Setter der Model-Eigenschaften aufgerufen
+	> Application aufruf 
+		* ActionListener aufrufen (vgl. 16.1. ActionListener)
+		* Action-Methoden aufrufen (z.B. um Änderungen zu Speichern, Suchen mit neuen Filterkriterien, Kommunikation mit anderen Service-Klassen etc.) 
+		* Navigation routen
+	> Response zurückgeben 	
+		* Komponenten bekommen die neuen Daten von den Managed Beans 
+		* Speichern des Komponenten-Baums für nachfolgende gleiche Anfragen
+- Das immediate-Attribut:
+	> bei Eingabefeldern 
+		* nur Komponenten mit dem Attribut immediate="true" werden an die Apply-Request-Phase weitergeleitet 
+			-> alle anderen verbleiben zunächst wartend 
+			-> z.B. perfekt für priorisierte Validierung
+		* gut um z.B. in Abhängigkeit eines Wertes einer Komponente (z.B. Checkbox) das Aussehen der Seite verändern will (z.B. ein und ausblenden einer anderen Komponente)
+		* Beispiel: 
+			-> im View 
+				<h:selectBooleanCheckbox onclick="this.form.submit()" value="#{bean.prop1}" immediate="true" valueChangeListener="bean.changed"></h:selectBooleanCheckbox>
+				<h:inputText value="#{bean.prop2}" rendered="#{bean.prop1 == true}"></h:inputText>
+			-> in der Bean benötigt man noch einen ValueChangeListener
+				public void changed(ValueChangeEvent e) {
+					Boolean value = (Boolean) e.getNewValue();
+					if (value != null) {
+						this.prop1 = value;
+					}
+					FacesContext.getCurrentInstance().renderResponse();
+				}
+	> bei Action-Komponenten (z.B. CommandButton)
+		* ist das Attribut immediate="true" gesetzt werden die Phasen (Apply-Request, Validierung, Konvertierung, Schreiben der Eigenschaften) übersprungen 
+			-> es geht gleich mit dem Application-Aufruf weiter der u.a. die Navigation übernimmt 
+			-> ist z.B. gut bei "Cancel"-Buttons, da es hier nicht notwendig ist Werte des Forumlars zu konvertieren, validieren etc. 
+- WICHTIG: JSF ruft am Anfang des Requests alle Getter der Managed Bean auf 
+	-> daher WICHTIG: keine zu rechenintensiven Operationen in die Getter packen 
+	-> hat man rechenintensive Codeteile sollte man die außerhalb der Getter platzieren und über andere Methoden kombiniert mit Events (z.B. PreRenderView) aufrufen (vgl. CRUD-APP Beispiel)
+		<f:metadata>
+			<f:event type="preRenderView" listener="#{userController.loadUsers()}"/>
+		</f:metadata>
+		-> hier gibt es im Controller eine Methode die die notwendigen Daten aus der Datenbank lädt und auf Objekte mappt 
+		-> diese Methode wird über einen "PreRenderView"-Event nur einmal vor dem Rendern des Requests aufgerufen (vgl. onLoad in Javascript)
+		
+9. Logging
+- Um das Logging zu verwenden muss man die Klasse java.util.logging.Logger verwenden -> sie schreibt in den Tomcat-Log 
+	-> Beispiel: 
+		private Logger logger = Logger.getLogger(getClass().getName());
+		logger.info("Information")
+		
+10. JSF-Helper Klassen 
+- Grundsätzlich: die folgenden Helper müssen immer wieder verwendet werden 
+	> daher eventuell gut einen GlobalController / GlobalBackingBean zu erzeugen die Methoden bereitstellt, welche die folgenden Helper kapseln 
+	> die eigentlichen Controller / BackingBeans erweitern dann diese Klasse 
+- FacesMessages: ermöglicht es eine Nachricht an die nächste Seite zu senden 
+- ExternalContext: ermöglicht es Daten zu einem Request hinzuzufügen 
+	ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
+	Map<String, Object> requestMap = externalContext.getRequestMap();
+	requestMap.put("user", user);
+- Session: ermöglicht es Daten in einer Session zu speichern 
+	HttpSession session = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(true);
+	session.setAttribute("currentUser",user)
+- Möglichkeiten des Zugriff von einer Managed Bean auf eine andere 
+	a.) Möglichkeit 1
+		FacesContext.getCurrentInstance().getApplication().evaluateExpressionGet(FacesContext,"#{userController}",UserController.class)
+	b.) Möglichkeit 2 
+		FacesContext facesContext = FacesContext.getCurrentInstance();
+        ELContext elContext = facesContext.getELContext();
+        BeanName beanName = (BeanName) elContext.getELResolver().getValue(elContext,null,"beanName");
+- Navigation (programmatisch)
+	navigationHandler.handleNavigation(facesContext,null,"/index.xhml?faces-redirect=true");
+- Variablen die im Zuge eines Flow-Scopes erstellt und belegt wurden (wenn man den Input nicht an ein Entity gebunden hat sondern nur an Variablen)
+	> Input kann im FlowScope an das implizite EL-Objekt "flowScope" gebunden werden 
+		-> z.B. <h:inputText value="#{flowScope.username}" ...
+	> Zugriff auf diese Variablen 
+		Map<Object,Object> flowScope = FacesContext.getCurrentInstance().getApplication().getFlowHandler().getCurrentFlowScope();
+		flowScope.get("username");
+	
+11. Properties File 
+- um Texte, Labels etc. nicht in den einzelnen JSF-Seiten hardcoden zu müssen können diese in einem Properties-File gesammelt und zentral verwaltet werden 
+	-> dazu unter src ein Properties-File anlegen (z.B. messages.properties)
+	-> dort trägt man Key-Value-Paare ein 
+		user.label.username = Benutzername
+- Das Properties-File kann als Resource-Bundle der JSF-Application global verfügbar gemacht werden durch einen Eintrag in "WEB-INF/faces-config.xml"
+	<application>
+        <resource-bundle>
+            <base-name>com.github.beisser.messages</base-name>
+            <var>messages</var>
+        </resource-bundle>
+    </application>
+- Anschließend kann man unter dem angegeben Variablenname (messages) auf den JSF-Seite darauf zugreifen 
+	<h:outputLabel for="firstName">#{messages["user.label.username"]}</h:outputLabel>
+	
+12. Templates 
+- Templates werden dafür genutzt um Code-Teile wiederverwenden zu können z.B. für ein Layout
+- Wichtige Templating Tags: 
+	> ui:composition: erstellt eine Komposition / Partial (eine Gruppierung von Komponenten)
+		-> ruft in Verbindung mit dem template-Attribut ein Template / Layout für die Komposition auf  
+	> ui:component: wie ui:composition nur wird für die Komponentengruppierung eine eigene Wurzelkomponente angelegt 
+	> ui:insert: Erstellt einen Platzhalter im Template der mit Content befüllt werden kann 
+	> ui:define: Erlaubt es Platzhalter in einem Template zu überschreiben	
+	> ui:decorate: erlaubt es innerhalb eines ui:composition-Tags weitere Templates zu verwenden 
+	> ui:include: Erlaubt es eine Komposition in die aktuelle View einzufügen 
+	> ui:param: Ermöglicht die Übergabe eines Parameters an ein ui:include 
+- Templates können auch mehrstufig definiert werden; Beispiel:
+	> z.B. wenn mein ein Basis-Template hat, dass header, footer und content hat (z.B. template.xhtml)
+		-> dieses Template hat dann z.B. einen Platzhalter für eine Navigationsleiste, da die je nach User unterschiedlich sein soll (User oder Admin)
+	> für User und Admins gibt es nun je ein weiteres Template (userTemplate.xhtml und adminTemplate.xhtml)
+		-> diese Sub-Templates verwenden template.xhtml, belegen jedoch die Navigation individuell 
+	> die eigentlichen Seiten verwenden dann entweder userTemplate oder adminTemplate
+- Es können auch mehrere Templates pro Seite verwendet werden z.B. um einen bestimmten Bereich innerhalb des Basis-Templates mit einem anderen 
+  Template zu stylen 
+	> dazu verwendet man ui:decorate
+		<ui:composition template="baseTemplate">
+			<ui:define name="header">
+				<ui:decorate template="/innerTemplate.xhtml">
+					<ui:param name="headlineText" value="User Management"/>
+					<hr/>
+				</ui:decorate>
+			</ui:define>
+		-> hier wird der Header-Platzhalter des baseTemplates im Inhalt belegt, der von einem anderen Template (innerTemplate) gestylt wird 
+		-> an das innerTemplate kann man mit ui:param Parameter übergeben, die dann mit EL ausgewertet werden können 
+		-> zusätzlich wird in ui:decorate der Inhalt übergeben, der an das innerTemplate übergeben werden soll 
+	> das innerTemplate muss so aussehen (WICHTIG: muss mit ui-composition-Tag beginnen, NICHT mit html): 
+		<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+			  xmlns:h="http://xmlns.jcp.org/jsf/html"
+			  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+			  xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+			<h3><h:outputText value="#{headlineText}"></h:outputText></h3>
+			<ui:insert>
+
+			</ui:insert>
+		</ui:composition>
+		-> hier hat man mit EL Zugriff auf die übergebenen Parameter 
+		-> nutzt man ui:insert-Platzhalter im innerTemplate ohne Namen-Attribut wird der gesamte Inhalt von ui:decorate eingefügt 
+	> ui:decorate kann beliebig oft innerhalb von ui:composition verwendet werden 
+	
+	12.1. Einfaches Templating
+	- Template erstellen: 
+		> Templates müssen in "WEB-INF/templates" abgelegt werden und sind selbst wiederum JSF-Pages (z.B. layout.xhtml)
+		> Anschließend müssten im Template File Platzhalter definiert werden 
+			<html xmlns="http://www.w3.org/1999/xhtml"
+				  xmlns:h="http://xmlns.jcp.org/jsf/html"
+				  xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+			<--Placeholder for metadata -->
+			<ui:insert name="metadata">
+				
+			</ui:insert>
+				  
+			<h:head>
+				<title>
+					<!-- Placeholder for Title -->
+					<ui:insert name="title">
+						Title
+					</ui:insert>
+					<!-- Placeholder for additional CSS and JS -->
+					<ui:insert name="css"></ui:insert>
+					<ui:insert name="js"></ui:insert>
+				</title>
+			</h:head>
+
+			<h:body>
+
+				<!-- Placeholder for header -->
+				<ui:insert name="header">
+					<!-- Default Header Html Code here -->
+				</ui:insert>
+
+				<!-- Placeholder for content -->
+				<ui:insert name="content">
+					<!-- Default Content Html Code here -->
+				</ui:insert>
+
+				<!-- Placeholder for footer -->
+				<ui:insert name="footer">
+					<!-- Default Footer Html Code here -->
+				</ui:insert>
+
+			</h:body>
+
+			</html>
+			-> für die Placeholder Title, header, content und footer kann man Defaults angeben
+			-> diese Defaults werden verwendet wenn kein Content in die Platzhalter eingefügt wird
+	- Template verwenden 
+		> ein fertiges Template kann dann in den normalen JSF-Pages verwendet werden 
+		> Beispiel: 
+			<!-- Angabe des Templates im ui:composition Tag --> 
+			<ui:composition template="WEB-INF/templates/layout.xhtml">
+			
+				<!-- Platzhalter mit dem Namen CSS befüllen --> 
+				<ui:define name="css">
+					<h:outputStylesheet library="css" name="style.css"></h:outputStylesheet>
+				</ui:define>
+			
+				<!-- Platzhalter mit dem Namen "content" befüllen --> 
+				<ui:define name="content">
+					<h:outputText value="Home"></h:outputText>
+					<h:form>
+						<h:commandButton value="Manage Users" action="users"></h:commandButton>
+					</h:form>
+				</ui:define>
+			</ui:composition>
+		> WICHTIG: verwendet man ein Template wird ALLES außerhalb des Tags ui:composition ignoriert!!!
+		
+	12.2. Erweitertes Templating 
+	- Erweitertes Templating ist mit "Resource-Library-Contract" möglich 
+		> dies ermöglicht es Templates einfach auszutauschen 
+		> dazu in web/contracts verschiedene Ordner erstellen 
+			* contract1
+			* contract2
+		> in den Ordnern muss jeweils ein File "template.xhtml" liegen 
+		-> WICHTIG: die Contracts müssen sich im Ordnernamen unterscheiden, jedoch muss das Template IMMER template.xthml heißen
+	- Der Ort wo die Contracts abgelegt sind lässt sich über web.xml unter dem Key "javax.faces.WEBAPP_CONTRACTS_DIRECTORY" ändern 
+	- Dann eine neue Managed Bean erstellen 
+		@ManagedBean
+		public class Contract {
+
+			// Default Contract 
+			private String contract = "contract1";
+
+			public String getContract() {
+				return contract;
+			}
+			
+			// hier kann weitere Logik rein um das Template z.B. dynamisch zu ändern z.B. mit einem Dropdown und dem valueChangeListener
+			// welcher hier implementiert ist 
+		}
+	- die JSF-Page muss dann so aussehen 
+		<html xmlns="http://www.w3.org/1999/xhtml"
+			  xmlns:h="http://xmlns.jcp.org/jsf/html"
+			  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+			  xmlns:f="http://xmlns.jcp.org/jsf/core">
+			  
+			<!-- WICHTIG: die Composition muss innerhabl von f:view sein; f:view wird von der Bean der aktuelle Contract-Name übergeben -->
+			<!-- der Contract-Name ist der Ordnername -->
+			<f:view contracts="#{contract.contract}">
+			
+				<!-- das Template ist immer template.xhtml -->
+				<ui:composition template="/template.xhtml">
+
+					<!-- hier können gewohnt die Platzhalter überschrieben werden -->
+					<ui:define name="header">
+						<h3>Main Page</h3>
+						<hr></hr>
+					</ui:define>
+
+					<ui:define name="content">
+						<div class="jumbotron">
+							<h2>JSF Training Project (#{navigationController.returnJsfVersion()})</h2>
+						</div>
+					</ui:define>
+				</ui:composition>
+			</f:view>
+		</html>
+	- Erweitertes Templating kann auch in faces-config.xml so konfiguriert werden, dass bestimmte Seiten ein eigenes Layout haben 
+	<application>	
+		<resource-library-contracts>
+            <contract-mapping>
+                <url-pattern>/admin/*</url-pattern>
+                <contracts>contract1</contracts>
+            </contract-mapping>
+        </resource-library-contracts>
+    </application>
+	-> hier kriegen z.B. alle Seiten im admin-Verzeichnis das Template von contract1
+	
+	12.3. Kompositionen (Partials)
+	- Kompositionen gruppieren Komponenten und stellen damit Partial-Views dar 
+		-> verschiedene Kompositionen können dann zu einem View kombiniert werden 
+		-> Kompositionen können ineinander verschachtelt werden
+	- will man außerhalb von Templates JSF-Page-Fragmente (vgl. Partials in Zend Framework) verwenden geht dies wie folgt 
+	- zunächst die Komposition definieren (Parameter die später übergeben werden sollen: #{paramName}) 
+		-> Ort: WEB-INF/includes/footer.xthml 
+		<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+			  xmlns:h="http://xmlns.jcp.org/jsf/html"
+			  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+			  xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+			<hr/>
+			<!-- composition parameter -->
+			#{copyright}
+		</ui:composition>
+	- dann einfügen des Partials in eine andere Seite (inklusive Parameterübergabe)
+		<!-- include a footer partial -->
+        <ui:include src="/WEB-INF/includes/footer.xhtml">
+            <ui:param name="copyright" value="&copy; Nico 2016"/>
+        </ui:include>
+	
+	
+13. Häufige Fehler: 
+- Target Unreachable: Null returned Null 
+	> Ursache: Constructor / JSF hat die ManagedBean nicht erstellt 
+	> Lösung: @PostConstruct - Methode im Objekt erstellen 
+		@PostConstruct
+		public void init() {
+			user = new User();
+		}
+		
+14. Dependency Injection 
+WICHTIG: die injizierte Bean darf keine kürzere Lebensdauer (Scope) haben (Ausnahme: NoneScoped / DependendScoped) 
+- Anwendungsfall: 
+	> eine Bean (ABean) hat einen SessionScope 
+	> zudem existiert eine Abhängigkeit zu einer anderen Bean (BBean); BBean hat einen DependendScoped (CDI) 
+	> somit kann BBean per Dependency Injection zur Laufzeit in ABean injected werden 
+- Verwendung 
+	@Named
+	@SessionScoped
+	public class ABean {
+		@Inject 
+		private BBean bbean; 
+		
+		// Setter muss existieren für DI
+		public void setBBean(BBean bbean) {
+			this.bbean = bbean;
+		}
+	}
+	-> die Bean welche injected (BBean) wurde bekommt damit den gleichen Scope wie die Bean in welche sie 
+	   injected wurde (ABean)
+- Alternativ besteht auch die Möglichkeit DI für ManagedBeans über faces-config.xml zu realisieren 
+	    <managed-bean>
+			<managed-bean-name>user</managed-bean-name>
+			<managed-bean-class>com.github.beisser.model.User</managed-bean-class>
+			<managed-bean-scope>session</managed-bean-scope>
+			<managed-property>
+				<property-name>logger</property-name>
+				<value>#{logger}</value>
+			</managed-property>
+		</managed-bean>
+	   
+15. Navigation 
+- drei Arten: 
+	> implizite Navigation 
+		* hier gibt man einem Action-Attribut entweder den Ziel-File-Namen direkt oder eine Methode die diesen zurückgibt
+		* will man dasss sich die URL auch ändert dann: action="goTo?faces-redirect=true"
+	> Regelbasierte Navigation 
+		* bietet flexiblere Möglichkeiten, da Navigation nicht hardgecoded in den Beans steht 
+		* wird in faces-config.xml festgelegt
+		* Beispiel 
+			<navigation-rule>
+				<from-view-id>/index.xhtml</from-view-id>				// Ausgangsseite 
+				<navigation-case>
+					<from-action>#{bean.goTo()}</from-action>			// Bean-Methode 
+					<from-outcome>success</from-outcome>				// wenn Methode "success" zurückgibt 
+					<to-view-id>/page_a.xhtml</to-view-id>				// dann zu page_a weiterleiten 
+					<redirect/>											// selbe Wirkung wie "faces-redirect=true"
+				</navigation-case>
+				<navigation-case>
+					<from-action>#{bean.goTo()}</from-action>
+					<from-outcome>fail</from-outcome>					// wenn Methode "fail" zurückgibt 
+					<to-view-id>/page_b.xhtml</to-view-id>				// dann zu page_b weiterleiten
+					<redirect/>
+				</navigation-case>
+			</navigation-rule>
+			-> Die Bean-Methode die z.B. auf einem Command Button an die Action übergeben wird, gibt nun nicht mehr den 
+			   Ziel-View selbst an, sondern gibt entweder "success" oder "fail" zurück 
+			   public String goTo() {
+					Boolean validation = true;
+					return validation ? "success" : "fail";
+				}
+			-> anhand des Ergebnisses entscheidet die Regelbasierte Navigation was in welchem Fall gemacht wird
+	> Erweiterte Regelbasierte Navigation 
+		* Bedingte Navigation: man kann zusätzlich zu <from-outcome> und <from-action> die Navigation mit <if> und einem EL-Ausdruck 
+		  noch feiner steuern 
+			<navigation-rule>
+				<from-view-id>/index.xhtml</from-view-id>
+				<navigation-case>
+					<if>#{userController.registrationCompleted.equals(true)}</if>
+					<from-outcome>goTo</from-outcome>
+					<to-view-id>/index.xhtml</to-view-id>
+				</navigation-case>
+				
+				<!-- weitere Fälle hier -->
+			</navigation-rule>
+			-> hier müsste sowohl <if> zu true und <from-outcome> zu goTo ausgewertet werden damit die Navigationsregel trifft 
+		* will man für mehrere Ausgangsseiten die gleiche Regel erstellen, dann geht das so
+			<navigation-rule>
+				<from-view-id>*</from-view-id>							// für alle Seiten 
+				<navigation-case>
+					<from-outcome>logout</from-outcome>					// wenn Action-Methode "logout" zurückgibt 
+					<to-view-id>/index.xhtml</to-view-id>				// wohin 
+				</navigation-case>
+			</navigation-rule>
+			-> in diesem Fall trifft die Regel, wenn egal welche Action-Methode den String "logout" zurückgibt 
+			-> will man die Regel auf die Rückgabe einer bestimmten Action-Methode einschränken dann mit "<from-action>" (siehe oben)
+	> programmatische Navigation 
+		FacesContext ctx = FacesContext.getCurrentInstance();
+        ctx.getApplication().getNavigationHandler().handleNavigation(ctx,null,"index.xthml");
+						
+16. Events und Event-Listener  
+
+	16.1. Action-Events 
+	- werden durch Drücken von Befehlskomponenten durch den Benutzer ausgelöst (commandButton und commandLink)
+	- Zu unterscheiden: 
+		> action (super für Aufrufe der Geschäftslogik)
+		> actionListener (super für Aufrufe der UI-Logik)
+	- Das Attribut actionListener gibt es auf Komponenten mit Action-Attribut (z.B. commandButton)
+		> actionListener erlaubt es im Gegensatz zum Action-Attribut eine Methode aufzurufen die KEINEN String zurückgibt 
+		> Zudem hat man hier Zugriff auf ein ActionEvent-Objekt, welches wiederum Zugriff auf die Komponente gibt, welche die Aktion ausgelöst hat 
+	a.) ohne Angabe eines action-Attributs 
+		* ist zusätzlich kein action-Attribut auf der Komponente gesetzt, wird nur der Code der ActionListener-Methode ausgeführt
+		* es erfolgt jedoch KEINE Navigation zu einer anderen Seite 
+		
+	b.) mit Angabe eines action-Attributs 
+		* der ActionListener wird immer VOR der Action ausgeführt 
+		* gut z.B. wenn man trotz eines Immediate-Attributs noch Code ausführen will
+		-> Beispiel 
+			<h:commandButton ... immediate="true" action="goTo" actionListener="#{controller.beforeLeave}"
+		-> im Controller: 
+			public void beforeLeave(ActionEvent e) {
+				// Code here 
+			}
+	
+	16.2. ValueChangeListener
+	- Bei Komponenten die ein value-Attribut (Eingabekomponenten) haben gibt es Value-Change-Events, die gefeuert werden, wenn sich der Wert ändert 
+		-> hat sich der Wert nicht geändert, wird kein Event ausgelöst
+	- für diese Events kann man auf zwei Arten Listener registrieren 
+		a.) valueChangeListener-Attribut 
+			<h:selectOneMenu valueChangeListener="#{controller.changed}"
+		
+			-> die Methode controller.changed wird dann aufgerufen sobald sich der Wert ändert 
+			-> diese Methode muss so aussehen 
+				public void changed(ValueChangeEvent e) {
+					// e.getNewValue für neuen Wert 
+					// e.getOldValue für vorherigen Wert
+					// e.getComponent ür Komponente 
+					
+					// wichtig: 
+					FacesContext.getCurrentInstance().renderResponse();
+				}
+		
+		b.) als Kind-Element 
+			<h:selectOneMenu ...
+				<f:valueChangeListener type="com.github.beisser.valueChangeListener.LogOnChange"
+				
+				-> hier wird statt einer Value-Change-Event-Methode eine ganze Klasse benötigt 
+					public class LogOnChange implements ValueChangeListener {
+						@Override
+						public void processValueChange(ValueChangeEvent valueChangeEvent) throws AbortProcessingException {
+							// e.getNewValue für neuen Wert 
+							// e.getOldValue für vorherigen Wert
+							// e.getComponent ür Komponente 
+							
+							// wichtig: 
+							FacesContext.getCurrentInstance().renderResponse();
+						}
+					}
+			-> Vorteil der Kind-Element-Lösung: es können mehrere Value-Change-Event-Listener pro Komponente registriert werden
+		
+	- Will man, dass nach dem ValueChangeListener das Formular abgesendet wird muss dies mit Javascript erfolgen 
+		<h:selectOneMenu valueChangeListener="" onChange="submit()">
+			
+	16.3 PhaseListener 
+	- bei jeder Phase des Life-Cycles wird ein Event gefeuert für den man Listener registrieren kann
+	- pro Phase kann entweder direkt vor der Phase oder direkt nach der Phase Code ausgeführt werden 
+	- Beispiel Authentication (ACHTUNG: nur als Beispiel: Authentication sollte NIE über PhaseListener erfolgen, da
+	    PhaseListener nur auf HttpRequests reagieren)
+		> erst den Listener erstellen 
+			public class AuthPhaseListener implements PhaseListener{
+
+				@Override
+				public void afterPhase(PhaseEvent phaseEvent) {
+					// Zugang zu FacesContext 
+					FacesContext facesContext = phaseEvent.getFacesContext();
+					
+					// Aktuelle Route 
+					String currentRoute = facesContext.getViewRoot().getViewId();
+					
+					// Zugriff auf Session 
+					HttpSession session = (HttpSession) facesContext.getExternalContext().getSession(false);
+
+					User user = (User) session.getAttribute("currentUser");
+
+					if (user == null && !currentRoute.endsWith("index.xhtml")) {
+					
+						// Weiterleitung falls kein User angemeldet ist  
+						NavigationHandler navigationHandler = facesContext.getApplication().getNavigationHandler();
+
+						navigationHandler.handleNavigation(facesContext,null,"/index.xhml?faces-redirect=true");
+					}
+
+				}
+
+				@Override
+				public void beforePhase(PhaseEvent phaseEvent) {
+
+				}
+
+				@Override
+				public PhaseId getPhaseId() {
+					// auf welche Phase soll gehört werden 
+					return PhaseId.RESTORE_VIEW;
+				}
+			}
+		> dann den Listener in faces-config.xml registrieren 
+			<lifecycle>
+				<phase-listener>
+					com.github.beisser.phaseListener.AuthPhaseListener
+				</phase-listener>
+			</lifecycle>
+			
+	16.4. System-Event-Listener 
+		16.4.1. System-Application - Events 
+		- welche Events gibt es 
+			> PostConstructApplicationEvent (feuert beim Start der Application, wenn Konfiguration geladen wurde)
+			> PreDestroyApplicationEvent (feuert vor dem Herunterfahren der Application)
+			> ExceptionQueuedEvent (feuert wenn eine Exception fliegt)
+		- auch für alle diese System-Events kann man Listener erstellen 
+			> Erst SystemEventListener erstellen: 
+				public class AppStartListener implements SystemEventListener{
+					@Override
+					public void processEvent(SystemEvent systemEvent) throws AbortProcessingException {
+
+						// which event should be handled 
+						if (systemEvent instanceof PostConstructApplicationEvent) {
+							Logger logger = Logger.getLogger(getClass().getName());
+							logger.info("JUST STARTED");
+						}
+					}
+
+					@Override
+					public boolean isListenerForSource(Object o) {
+						return o instanceof Application;
+					}
+				}
+			> Listener dann der Application in faces-config.xml zur Verfügung stellen 
+				<application>
+					<!-- WICHTIG: PRO System-Event ein Eintrag auch wenn die Listener-Klasse sich bei beide kümmert --> 
+					<system-event-listener>
+						<system-event-listener-class>com.github.beisser.systemEventListener.AppStartListener</system-event-listener-class>
+						<system-event-class>javax.faces.event.PostConstructApplicationEvent</system-event-class>
+					</system-event-listener>
+					<system-event-listener>
+						<system-event-listener-class>com.github.beisser.systemEventListener.AppStartListener</system-event-listener-class>
+						<system-event-class>javax.faces.event.PreDestroyApplicationEvent</system-event-class>
+					</system-event-listener>
+				</application>
+				
+		16.4.2. System-Component-Events 
+		- welche Events gibt es 
+			> preRenderComponent (wird vor dem Rendern der Komponente ausgelöst)
+			> postAddToView ((wird nach dem Hinzufügen der Komponente zum Komponenten-Baum ausgelöst))
+			> preValidate (wird vor dem Validieren der Komponente ausgelöst)
+			> postValidate (wird nach dem Validieren der Komponente ausgelöst)
+			> preDestroyViewMap
+			> postConstructViewMap 
+			> preRenderView (wird vor dem Rendern des ganzen Views ausgelöst)
+			> postRestoreState
+		- wie werden Listener dafür registriert:
+			a.) Beispiel für einen Listener für die GANZE VIEW 
+			> auf der JSF-Page: 
+				<f:metadata>
+					<f:event type="preRenderView" listener="#{userController.loadUsers()}"/>
+				</f:metadata>
+			> wird der Event gefeuert wird die folgende Methode aufgerufen 
+				public void loadUsers() {
+					// Code here 
+				}
+			
+			b.) Beispiel für einen Listener von nur einer Komponente 
+			> auf JSF-Page 
+				<h:inputText ...>
+					<f:event type="postValidate" listener="#{userController.postValidation}"></f:event>
+				</h:inputText>
+			> im Controller muss es dann eine entsprechende Methode geben 
+				public void postValidation(ComponentSystemEvent event) {
+
+					// fetch the component
+					UIComponent comp = event.getComponent();
+
+					// check if is an editablevalueHoler
+					if (comp instanceof EditableValueHolder) {
+						EditableValueHolder editableValueHolder = (EditableValueHolder) comp;
+
+						// check if validation was not successful
+						if(!editableValueHolder.isValid()){
+							// add styleClass if validation fails 
+							comp.getAttributes().put("styleClass","error-form");
+						}
+					}
+				}
+			> ALTERNATIV kann wie bei den anderen Listenern eine eigene Klasse gebaut werden 
+				public class InputFieldValidationListener implements SystemEventListener {
+
+					@Override
+					public void processEvent(SystemEvent systemEvent) throws AbortProcessingException {
+						UIInput input = (UIInput)systemEvent.getSource();
+
+						if (input instanceof EditableValueHolder) {
+							if (!input.isValid()) {
+								input.getAttributes().put("style","background:red");
+							} else {
+								input.getAttributes().put("style","background:green");
+							}
+						}
+					}
+
+					@Override
+					public boolean isListenerForSource(Object o) {
+						return o instanceof UIInput;
+					}
+				}
+				-> diese muss dann wie gewohnt in faces-config.xml registriert werden 
+					<application>
+						<system-event-listener>
+							<!-- WICHTIG hier muss angegeben werden für welche Komponenten der Listener gelten soll -->
+							<source-class>
+								javax.faces.component.html.HtmlInputText
+							</source-class>
+							<system-event-class>javax.faces.event.PostValidateEvent</system-event-class>
+							<system-event-listener-class>com.github.beisser.systemEventListener.InputFieldValidationListener</system-event-listener-class>
+						</system-event-listener>
+					</application>
+				-> im View muss nichts gemacht werden!
+				-> der Listener wird automatisch für die konfigurierten Komponenten registriert 
+				
+17. f:viewParam und f:viewAction 
+
+	17.1. f:viewParam
+	- durch Zugriff auf GET-Parameter kann man Seite RESTful machen 
+		-> d.h. sie liefert für die gleiche Route immer das gleiche Ergebnis 
+		-> damit kann sie als Lesezeichen gespeichert werden
+	- Vorgehensweise: 
+		-> zunächst im Layout / Template einen zusätzlichen Platzhalter für metadata einfügen 
+			<ui:insert name="metadata"/>
+		-> im konkreten View / JSF-Page muss dieser Platzhalter dann überschrieben werden 
+			<ui:define name="metadata">
+				<f:metadata>
+					<-- heisst der View-Parameter "viewParam1" kann man diesen so an eine entsprechende Eigenschaft einer Managed Bean hängen -->
+					<f:viewParam name="viewParam1" value="#{viewParamController.viewParam1}"></f:viewParam>
+				</f:metadata>
+			</ui:define>
+		-> Alternative: man muss die View-Parameter nicht an ein Model binden sondern kann sie auch einfach über die Expression-Language erreichen 
+			<ui:define name="metadata">
+				<f:metadata>
+					<-- heisst der View-Parameter "viewParam1" ist dieser über die Expression-Language erreichbar -->
+					<f:viewParam name="viewParam1"></f:viewParam>
+				</f:metadata>
+			<ui:define name="content">
+				<h:outputText value="#{searchFor}" rendered="#{searchFor != null}"></h:outputText>
+			</ui:define>
+	- View-Parameter können auch konvertiert und validiert werden (und sollten auch!)
+		> ViewParameter sind damit wie normale Eingabekomponenten 
+		> d.h. existieren View-Parameter auf einer JSF-Seite, geht JSF beim Aufruf der Seite den ganzen Life-Cycle einmal durch (inklusive Konvertierung, 
+		  Validierung und Model-Binding) 
+		> ist beim Durchlauf des Life-Cycle alles in Ordnung wird in der Invoke-Application-Phase die viewAction aufgerufen 
+
+	17.2. f:viewAction 
+	- Tag ermöglicht es Action-Methoden aufzurufen bevor die Seite gerendert wird 
+		-> WICHTIG: viewActions werden nur beim initialem GET-Request aufgrufen 
+		-> sollen die actionMethoden auch bei Postbacks aufgerufen werden, gibt es das Attribut (onPostback)
+	- viewActions haben zusätzlich das Attribute "phase" mit dem angegeben werden kann, wann die viewAction ausgeführt wird 
+		> phase="APPLY_REQUEST_VALUES"
+		> phase="PROCESS_VALIDATIONS"
+		> phase="UPDATE_MODEL_VALUES"
+		> phase="INVOKE_APPLICATION" (Default, da ViewParameter wie Eingabekomponenten erst konvertiert, validiert und ans Model gebunden werden)
+	- Gut z.B. wenn man eine Show-Seite hat die anhand einer ID zusätzliche Infos aus der Datenbank holt 
+		> die Id würde dann über einen GET-Parameter reinkommen (vgl. action="show.xhtml?id=2")
+		> diese Parameter kann man sich über viewParameter holen (vgl. 17. Zugriff auf View-Parameters (GET-Parameter))
+		> in einer Bean gibt es dann eine Methode z.B. "loadData()" welche mit f:viewAction aufgerufen wird und damit vor 
+		  dem Seitenrendern die notwendigen Informationen holt 
+				<f:metadata>
+				<f:viewParam name="viewParam1" value="#{viewParamController.viewParam1}"></f:viewParam>
+				<f:viewAction action="#{viewParamController.loadData()}">
+			</f:metadata>
+			-> WICHTIG: viewAction wird erst in Invoke-Application-Phase aufgerufen, denn View Parameter sind wie Eingabekomponenten und werden 
+			   erst konvertiert, validiert und an ein Model gebunden 
+			-> Schlägt z.B. bei View-Parametern die Validierung fehl, wird viewAction erst gar nicht aufgerufen 
+		> da es möglich ist dass kein Datensatz zurückkommt sollte die Methode "loadData" Boolean zurückgeben je nachdem 
+		> in der faces-config.xml kann man dann je nach Rückgabe entscheiden was passiert 
+			<navigation-rule>
+					<from-view-id>/show.xhtml</from-view-id>				
+					<navigation-case>
+						<from-action>#{viewParamController.loadData()}</from-action>
+						<from-outcome>true</from-outcome>					
+						<to-view-id>/profile.xhtml</to-view-id>				
+					</navigation-case>
+					<from-view-id>/show.xhtml</from-view-id>				
+					<navigation-case>
+						<from-action>#{viewParamController.loadData()}</from-action>
+						<from-outcome>false</from-outcome>					
+						<to-view-id>/index.xhtml</to-view-id>				
+						<redirect/>
+					</navigation-case>
+				</navigation-rule>
+	- Alternative zu viewAction ist das preRenderView-Event 
+		<f:metadata>
+			<f:event type="preRenderView" listener="#{viewParamController.loadData()}"/>
+		</f:metadata>
+
+18. HTML5-Features
+- Für einige HTML5-Elemente gibt es noch keine Komponenten 
+	> man kann diese jedoch dennoch mit JSF verwenden indem man die jsf:Tag Library importiert 
+	> diese bietet Attribute um normale HTML5-Elemente mit JSF zu verwenden 
+	> Beispiel: die kommenden beiden Beispiele ergeben das gleiche: 
+		<h:inputText value="#{bean.property}"/>
+		<inputText jsf:value="#{bean.property}"/>
+	> man kann also alle normalen HTML-Elemente zu JSF-Komponenten machen indem an die jeweiligen Attribute "jsf:" davor hängt 
+		* jsf:value
+		* jsf:id 
+- Bei neuen HTML5-Attributen oder eigene "data"-Attributen funktioniert die Methode mit "jsf:" jedoch nicht 
+	> will man eigene oder neue Attribute ein einer JSF-Komponente verwenden geht das mit
+		a.) p:data-custom: hierzu muss man die Tag-Lib "Passthrouh" verwenden  
+			<h:outpuLabel ... p:data-custom="wert">
+		b.) f:passThroughAttribute
+			<h:outpuLabel ...>
+				<f:passThroughAttribute name="data-custom" value="wert"/>
+			</h:outputLabel>
+		c.) f:passThroughAttributes: hat man mehrere unbekannte Attribute kann man diese auch in einer Bean als Map speichern und dann mit  verwenden 
+			<h:outpuLabel ...>
+				<f:passThroughAttributes value="#{bean.unkownAttributes}"/>
+			</h:outputLabel>
+			
+19. Flow Scope
+- FlowScoped Beans sind über mehrere vordefinierte Seiten gültig 
+	-> bieten sich z.B. bei einem Wizard an 
+- Flow-Scopes gehen NUR mit CDI 
+- Beispiel: 
+	> Zunächste muss eine Bean erstellt werden, welche später über mehere Seiten gefüllt wird 
+		@Named
+		@FlowScoped("wizard")
+		public class Wizard implements Serializable{
+
+			private String firstName;
+			private String lastName;
+
+			public String getFirstName() {
+				return firstName;
+			}
+
+			public void setFirstName(String firstName) {
+				this.firstName = firstName;
+			}
+
+			public String getLastName() {
+				return lastName;
+			}
+
+			public void setLastName(String lastName) {
+				this.lastName = lastName;
+			}
+
+			public String complete() {
+				return "index.xthml?faces-redirect=true";
+			}
+		}
+	> dann muss im web Ordner ein weiterer Ordner erstellt werden, der genauso heisst wie der Flow Scope (hier: "wizard")
+	> in diesem Ordner muss dann ein config-xml erstellt werden dass so heisst: <flowName>-flow.xml (hier also "wizard-flow.xml")
+		<?xml version='1.0' encoding='UTF-8'?>
+		<faces-config version="2.2" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+					  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+					  xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+			http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd">
+
+			<flow-definition id="wizard"></flow-definition>
+
+		</faces-config>
+	> die verschiedenen JSF-Pages für den Flow müssen dann ebenfalls in dem Ordner abgelegt werden 
+		-> WICHTIG: die erste JSF-Page MUSS so heissen wie der Flow (hier "wizard")
+	> gestartet wird der Flow indem man in einem Action-Attribut auf den Flow-Namen verweist 
+		-> hier also ... action="wizard"
+	> in den einzelnen JSF-Pages kann dann auf die jeweils nächste verwiesen werden 
+- > Input kann im FlowScope an das implizite EL-Objekt "flowScope" gebunden werden (man benötgt also nicht unbedingt ein Entity)
+		-> z.B. <h:inputText value="#{flowScope.username}" ...
+	> Zugriff auf diese Variablen 
+		Map<Object,Object> flowScope = FacesContext.getCurrentInstance().getApplication().getFlowHandler().getCurrentFlowScope();
+		flowScope.get("username");
+	
+20. Flash Scope 
+- Flash Scope ist eine Session die nur bis zur nächsten Seite lebt 
+- kann nicht über Annotation gesetzt werden 
+- Verwendung: 
+	> Wert kann ohne ManagedBean an Flash-Scope gebunden werden indem man in EL auf implizites Objekt flash zurückgreift 
+		<h:inputText value"#{flash.firstName}" ...>
+		-> hier wird eine neue Variable "firstName" erstellt die den Wert des Input-Feldes hat 
+		-> auf diese Variable kann man auf der nächsten Seite zugreifen 
+		<h:outputText value="#{flash.firstName}"
+	> will man den Wert noch eine Seite weiter behalten geht das über das "keep" Attribut auf der Zielseite 
+		<h:outputText value="#{flash.keep.firstName}"
+- Aus einer Baking Bean heraus kann man eine Flash-Variable so setzen: 
+	FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Hier die Flash Nachricht"))
+	
+21. Stateless-Views 
+- Normalerweise wird der State des Komponenten-Baums in einer Session auf dem Server gespeichert; wie lange kann man in web.xml festlegen (hier 1 Minute)
+	<session-config>
+        <session-timeout>
+            1
+        </session-timeout>
+    </session-config>
+- da es hierbei nach dem Timeout zu einer ViewExpiredException kann man den State auch auf dem Client speichern 
+	> dazu umgibt mein seinen View einfach mit folgendem Tag 
+		<f:view transient="true" ...
+- WICHTIG ist jedoch, dass Stateless-Views NICHT mit Beans verdunden sind, die State-abhängige-Scopes haben (SessionScope,ViewScope)
+
+22. FacesContext
+- ermöglicht Zugriff auf alle essentielle Funktionen von JSF 
+	* Expression-Language (alles was über EL erreichbar ist, ist auch über FacesContext erreichbar)
+		a.) Möglichkeit 1
+		FacesContext.getCurrentInstance().getApplication().evaluateExpressionGet(FacesContext,"#{userController}",UserController.class)
+		b.) Möglichkeit 2 
+			FacesContext facesContext = FacesContext.getCurrentInstance();
+			ELContext elContext = facesContext.getELContext();
+			BeanName beanName = (BeanName) elContext.getELResolver().getValue(elContext,null,"beanName");
+	* erstellen und Auslesen von Nachrichten (Faces-Message)
+		a.) Erstellen: FacesContext.getCurrentInstance().addMessage(null, message);
+		b.) Auslesen: FacesContext.getCurrentInstance().getMessages();
+	* Application-Objekt 
+		-> z.B. um Navigation auszulösen: ctx.getApplication().getNavigationHandler().handleNavigation(ctx,null,"index.xthml");
+	* HTTP-Lebenslauf beeinflussen 
+		a.) FacesContext.getCurrentInstance().renderResponse() (JSF-Life-Cycle springt sofort in Render-Response-Phase)
+		b.) FacesContext.getCurrentInstance().responseComplete()
+	* Zugriff auf ExternalContext, der wiederum Zugriff gibt auf: 
+		* Locale
+		* Request
+		* Header 
+		* Session 
+			
+23. Servlets 
+- will man bestimmte Inhalte dynamisch verwalten braucht man Servlets 
+- Server können keinen dynamischen Content bereitstellen 
+- Server und Servlet können jedoch nicht direkt miteinander kommunizieren
+	> dazu gibt es einen Webcontainer, welcher die Callbacks des Servlets aufruft 
+	> Webcontainer erstellt Request- und Response-Objekte und stellt sie dem Servlet zur Verfügung, damit dieses 
+	  die Objekte bearbeiten / manipulieren kann
+	> Webcontainer legt auch fest wie lange das Servlet-Objekt besteht 
+	> für jeden Typ von dynamischen Content gibt es ein eigenes Servlet
+	> es gibt zudem einen Servlet-Context im Webcontainer, über den man auf JSF-Eigenschaften zugreifen kann, z.B.
+		* FacesContext
+		* Managed Beans
+- Life-Cycle eines Servlets
+	> wenn es nicht existiert erstellt der Webcontainer eines und ruft die init()-Methode auf
+	> wenn ein Request reinkommt ruft der Webcontainer die service()-Methode des Servlets auf 
+	> der Service ruft dann je nach Http-Methode (GET/ POST) die Methoden auf 
+		* doGet(hat nur Request-Line und Header)
+		* doPost(hat Request-Line, Header und Body) 
+- Eigene Servlets schreiben 
+	> über die Annotation @Webservlet muss ein Name angegeben werden und ein urlPattern
+		@WebServlet(name="ImageServlet",urlPatterns = {"/ImageServlet"})
+		-> über das UrlPattern wird das Servlet später aufgerufen 
+	> das eigene Servlet muss dann HttpServlet erweitern 
+		public class ImageServlet extends HttpServlet {}
+	> je nach Http-Methode die das Servlet verarbeiten soll (GET,POST,PUT etc.) muss die entsprechende doXxx-Methode überschrieben werden
+	> wichtige Methoden des HttpServlets, die man in der eigenen Implementierung verwenden kann 
+		* req.getParameter("optionalParameter"): Parameter holen 
+		* getServletContext().getAttribute("beanName"): ApplicationScoped Beans holen 
+		* req.getSession().getAttribute("beanName"): SessionScoped Beans holen 
+		* req.getAttribute("beanName"): RequestScoped Beans holen 
+		* resp.getOutputStream(): OutputStream out = resp.getOutputStream() 
+		* resp.setContentType(): Content-Typ des Outputs festlegen 
+		* out.write(): Content in OutputStream schreiben
+	> Aufruf eines Servlets in JSF
+		<h:graphicImage value="/ImageServlet?optionalParameter=optional"
+- Beispiel Servlet 
+	@WebServlet(name="ImageServlet",urlPatterns = {"/ImageServlet"})
+	public class ImageServlet extends HttpServlet {
+		@Override
+		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+			// userController bean holen 
+			UserController userController = (UserController) req.getSession().getAttribute("userController");
+
+			if (userController != null && userController.getUser().getImage() != null) {
+				User user = userController.getUser();
+				
+				// output stream holen und einer Variable zuweisen 
+				try(OutputStream out = resp.getOutputStream()) {
+					String contentType = user.getImage().getContentType();
+					byte[] content = IOUtils.toByteArray(user.getImage().getInputStream());
+					
+					// WICHTIG: Contenttyp setzen und Output schreiben 
+					resp.setContentType(contentType);
+					out.write(content);
+				}
+			}
+
+		}
+	}
+	
+24. f:ajax 
+- ermöglicht das nachladen von Komponenten
+- wird als KindTag einer anderen K
+- wichtige Attribute: 
+	> render: welche Komponente soll neu gerendert werden 
+		* <f:ajax render="comp1 comp2" ... (Komponente comp1 und comp2 neu rendern)
+		* <f:ajax render"@all" ... (Alles neu renden)
+	> delay: AJAX-Request verzögern 
+	> execute: was soll ausgeführt werden 
+		
+25. i18n 
+- Festlegung der Sprach- bzw. Formatierungseinstellungen über das Locale-Objekt
+- zunächste .properties-Files für jede unterstütze Sprache erstellen 
+	> messages.properties (Default)
+	> messages_de.properties (DE)
+- h:outputFormat: ermöglicht das setzen von Platzhaltern in den Übersetzungsfiles 
+	> in messages.properties
+		user.welcome.message = Willkommen zurück {0}{1}
+	> im View 
+		<h:outputFormat value="#{messages.user.welcome.message}">
+			<f:param value="John"/>			// erster Parameter 
+			<f:param value="Doe"/>			// zweiter Parameter 
+		</h:outputFormat>
+- dann muss faces-config.xml angepasst werden 
+	<application>
+        <locale-config>
+            <default-locale>en</default-locale>
+			<supported-locale>de</supported-locale>
+        </locale-config>
+        <resource-bundle>
+            <!-- definie Resource Bundle to access properties File -->
+            <base-name>com.github.beisser.messages</base-name>
+            <var>messages</var>
+        </resource-bundle>
+	</application>
+	-> unter resource-bundle wird festgelegt wo die .properties Files liegen 
+	-> unter default-locale wird die Standard-Sprache festgelegt 
+	-> unter supported-locale wird festgelegt welche Sprache noch unterstützt wird 
+- auf den JSF-Pages wird die i18n-Funktionalität so aufgerufen 
+	#{messages['key']}
+- Locale vom Benutzer setzen lassen 
+	> das f:view Tag hat ein Attribut locale 
+	> dieses kann man durch eine SessionScoped ManagedBean setzen 
+	> Beispiel 
+		<f:view locale="#{i18nBean.locale}">
+- die aktuell eingestellte Locale erhält man mit: 
+	FacesContext.getCurrentInstance().getExternalContext().getRequestLocale()
+- programmatisch erhält man das Resource-Bundle und einen Eintrag: 
+	FacesContext ctx = FacesContext.getCurrentInstance();
+	String text = ctx.getApplication().getResourceBundle(ctx,"messages").getString("user.welcome.message");
+	
+	// Ausgabe mit Belegung der Platzhalter 
+	text = MessageFormat.format(text,args);
+	
+26. Erweiterte Techniken 
+
+	26.1. Project-Stage 
+	- in web.xml kann die Project-Stage definiert werden 
+		<context-param>
+			<param-name>javax.faces.PROJECT_STAGE</param-name>
+			<param-value>Developement</param-value>
+		</context-param>
+	- gültige Werte sind: 
+		> UnitTest
+		> SystemTest
+		> Developement
+		> Production
+	- Vorteile im Developement-Mode 
+		> JSF fügt auf jeder Seite eine h:messages ein um System-Nachrichten immer sehen zu können 
+		> Resourcen (CSS,JS etc.) werden NICHT gecacht
+	- Project-Stage ist auch programmatisch zugänglich
+		a.) Project-Stage zurückbekommen 
+		FacesContext ctx = FacesContext.getCurrentInstance();
+		Application app = ctx.getApplication();
+		ProjectStage stage = app.getProjectStage();
+		
+		b.) Project-Stage prüfen 
+		if (ctx.isProjectStage(ProjectStage.Development)) {
+			// Code here
+		}
+	
+	26.2. Eigene Tag Bibliotheken
+
+		26.2.1. Tag-Bibliothek definieren 
+		
+			a.) Tag-Lib-XML erstellen 
+			> in diesem XML wird der Namespace der eigenen Tag-Lib definiert und die eigenen Tags deklariert
+			> das XML muss 
+				* die Endung taglib.xml haben 
+				* im Verzeichnis WEB-INF abgelegt werden (z.B. WEB-INF/beisser.taglib.xml) 
+			> Aufbau: 
+				<facelet-taglib version="2.2" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+					xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facelettaglibrary_2_2.xsd">
+					
+					<!-- namespace of the custom lib --> 
+					<namespace>http://com.github/beisser</namespace>
+
+					<!-- converter tag --> 
+					<tag>
+						<tag-name>toUpperConverter</tag-name>
+						<converter>
+							<converter-id>com.github.beisser.converter.ToUpperConverter</converter-id>
+						</converter>
+					</tag>
+				</facelet-taglib>
+				
+			b.) Registrierung der eigenen Tag-Lib in der Applikation 
+			> Eigene Tag-Lib muss in web.xml registriert werden 
+				<context-param>
+					<param-name>javax.faces.FACELETS_LIBRARIES</param-name>
+					<param-value>/WEB-INF/beisser.taglib.xml</param-value>
+				</context-param>
+				
+			c.) Verwendung der eigenen Tag-Lib 
+			> über Namespace in die JSF-Page einbinden und dabei Präfix zuweisen (hier nb)
+				xmlns:nb="http://com.github/beisser"
+			> dann mit zugewiesenem Präfix verwenden 
+				<nb:toUpperConverter/>
+		
+		
+		26.2.2. Eigene Validator bzw. Konverter-Tags 
+		> für die selbst erstellten Konverter ist es möglich eigene Tags in der Bibliothek zu registrieren 
+		> dazu einfach zur taglib.xml folgendes hinzufügen 
+			    <tag>
+					<tag-name>toUpperConverter</tag-name>
+					<converter>
+						<converter-id>com.github.beisser.converter.ToUpperConverter</converter-id>
+					</converter>
+				</tag>
+		> Anwenden des Converters dann wie gehabt als Kindtag einer Eingabekomponente
+			<inpuText ... 
+				<!-- wichtig ist die Angabe des Tag-Bibliothek-Präfixes unter dem die Lib eingebunden wurde -->
+				<nb:toUpperConverter/>
+		> WICHTIG: 
+			* den eigenen Tags können Attribute mitgegeben werden 
+				<nb:upperCaseValidator alternativeMessage="Bitte Uppercase beachten"/>
+			* diese Attribute werden automatisch in den Konverter- bzw. Validator-Klassen an eventuell vorhandene Eigenschaften der Klasse gebunden 
+			  und können hier weiterverarbeitet werden 
+				public class UpperCaseValidator implements Validator{
+
+					private String alternativeMessage;
+					
+					...
+					
+					public String getAlternativeMessage() {
+						return alternativeMessage;
+					}
+
+					public void setAlternativeMessage(String alternativeMessage) {
+						this.alternativeMessage = alternativeMessage;
+					}
+				
+				}
+				
+		> das Erstellen von Validator-Tags enthält sich gleich 
+		
+		
+		26.2.3. Tags für klassische Kompontentn 
+		- für selbst erstellte klassische Komponenten können Tags wie folgt definiert werden: 
+			<tag>
+				<tag-name>toUpperRenderer</tag-name>
+				<component>
+					<component-type>com.github.beisser.gui.jsf.component.ToUpperRenderer</component-type>
+				</component>
+			</tag>
+		
+		26.2.4. Tags für Composite-Components 
+		- für selbst erstellte CCs können Tags wie folgt erstellt werden: 
+		<tag>
+			<tag-name>loginForm</tag-name>
+			<component>
+				<resource-id>beisser/loginForm.xhtml</resource-id>
+			</component>
+		</tag>
+		
+		26.2.4. Eigene Lib als JAR zur Verfügung stellen 
+		- Die eigene Lib kann auch mit folgenden Inhalten in eine .jar gepackt werden 
+			> den Resourcen-Ordner mit den CCs 
+			> die klassichen Komponentenklassen 
+			> eine leere faces-config.xml (wenn Annotationen verwendet werden)
+		- Um die eigene Lib im .jar-Format anwenden zu können muss die .jar unter "META-INF/resources" abgelegt werden 
+		
+	26.3. JSF-Konfiguration 
+	
+		26.3.1. web.xml 
+		- Konfiguration des FacesServlet und dessen Mapping  
+		- Setzen von Kontextparametern 
+			> Syntax: 
+				<context-param>
+					<param-name>javax.faces.INTERPRET_EMPTY_STRING_VALUES_AS_NULL</param-name>
+					<param-value>true</param-value>
+				</context-param>
+			> einige Paramter
+				* javax.faces.CONFIG_FILES (zusätzliche Konfigurationsfiles zu faces-config.xml z.B. um umfangreiche Navigations-Konfiguration auszulagern)
+				* javax.faces.FACELETS_LIBRARIES (eigene Tag-Lib registrieren)
+				* javax.faces.FACELETS_SKIP_COMMENTS (true entfernt Kommentare beim Rendern)
+				* javax.faces.INTERPRET_EMPTY_STRING_VALUES_AS_NULL (true bewirkt: leere Forumlarfelder werden von Leerstring in NULL umgewandelt)
+				* javax.faces.PROJECT_STAGE (Projekt-Phase einstellen)
+				* javax.faces.STATE_SAVING_METHOD (soll State auf "server" oder "client" gespeichert werden)
+				* javax.faces.VALIDATE_EMPTY_STRINGS (Validierungsverhalten wenn Eingabe Leerstring oder NULL ist)
+					# true (alles wird validiert)
+					# auto (alles wird validiert, wenn Bean-Validation an ist)
+					# false (nur Eingaben die nicht Leer oder Null sind werden validiert)
+				* javax.faces.WEBAPP_CONTRACTS_DIRECTORY (definiert das Verzeichnis wo Contracts hinterlegt sind)
+				* javax.faces.WEBAPP_RESOURCES_DIRECTORY (definiert das Verzeichnis wo Resourcen abgelegt sind)
+				
+		26.3.2. faces-config.xml 
+		- JSF-spezifische Konfigurationen 
+			-> BEACHTE: viele dieser Aufgaben müssen nicht mehr in faces-config.xml gemacht werden, sondern können auch durch 
+			   Annotationen erledigt werden 
+		- Aufgaben (allgemein): 
+			> Konfiguration von Managed Beans und Dependency Injection 
+				<managed-bean> oder @ManagedBean(oder @Named für CDI)
+			> Navigationseinstellungen 
+				<navigation-rule>
+			> wichtige Application-Einstellungen 
+				<application>
+				-> kann enthalten 
+					<locale-config> (für i18n)
+					<resource-bundle> (für Texte/ Übersetzungen der Anwendung)
+					<system-event-listener> (für komponentenunabhängige Events)
+					
+27. Composite-Components (CC)
+- einfachste Möglichkeit eine eigene Komponente zu erstellen (geschieht deklarativ indem Komponenten aus Facelets und Resourcen erstellt werden)
+	-> eigentlich nur ein .xhtml-File im resource-Verzeichnis 
+- CC haben eine gewissen Ähnlichkeit zu Templates (u.a. Definition durch ein den CC-Code definierendes ui:composition)
+- JSF erzeugt für jede CC eine Wurzelkomponente (defaultmäßig ist das UINamingContainer)
+	> diese Wurzelkomponente enthält dann alle anderen Komponeten der eigenen CC 
+	> diese Wurzelkomponente kann man auch selbst definieren um Java-Code in die eigene CC zu integrieren (vgl. 29. Kombination von CC und klassischen Komponenten)
+- Erstellung einer CC:
+	> Zunächst muss im WebApp-Verzeichnis ein Ordner "resources" erstellt werden 
+	> innerhalb von resources muss in weiteres Verzeichnis erstellt werden, welches die Resourcenlib benennt (z.B. beisser)
+	> in der Resourcenlib erstellt man ein .xhtml-File für die Deklaration der Komponente (z.B. testBox.xhtml)
+		<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+			xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+			xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+			xmlns:h="http://java.sun.com/jsf/html">
+
+			<!-- component attributes -->
+			<cc:interface>
+				<cc:attribute name="company"></cc:attribute>
+			</cc:interface>
+
+			<!-- component implementation -->
+			<cc:implementation>
+				<!-- access component attributes -->
+				<a class="navbar-brand" href="https://github.com/beisser">#{cc.attrs.company}</a>
+				
+				<!-- insert content inside component tags -->
+				<cc:insertChildren>
+
+				</cc:insertChildren>
+			</cc:implementation>
+		</ui:composition>
+		
+	Erklärung: 
+	> ui:composition definiert die Komposition 
+	> cc:interface bestimmt welche Attribute die Komponente verarbeiten soll (Schnittstelle siehe 27.1)
+	> cc ist in implizites Objekt der EL und gibt Zugriff auf die Attribute der Komponente
+	> cc:implementation: hier wird die Komponente erstellt mittels HTML und JSF-Tags 
+	> cc:insertChildren fügt Content ein, der zwischen den Komponenten-Tags beim Aufruf steht 
+	> WICHTIG: auch wenn die eigene CC Formular-Komponenten enthält (z.B. h:inputText) darf sie KEINE Container-Komponenten enthalten 
+	  (sowas wie h:form)
+		
+- Einbinden einer CC 
+	 > per Konverntion: xmlns:nb="http://xmlns.jcp.org/jsf/composite/beisser"
+	 > dann kann die Komponente über ihren Namen aufgerufen werden 
+		<nb:companyLink company="com.github.beisser"/>
+		
+	27.1. Mögliche Tags für die cc:interface 
+		27.1.1. cc:attribute (definiert ein Attribut) 
+		- Mögliche Attribute: 
+			* required (Angabe des Attributs bei der Verwendung verpflichtend?)
+			* default (Default-Wert wenn ein Attribut optional ist)
+			* name (definiert Attribut)
+			* type (Datentyp des Attributs mit vollqualifiziertem Namen; Default ist java.lang.Object)
+			* method-signature (zwingend notwendig, wenn Attribut eine Methode-Expression entgegennehmen soll) 
+				> hier muss der Rückgabetyp vollqualifiziert und die Signatur der Methode angegeben werden 
+					-> Beispiel: 
+						method-signature="java.lang.String actionName()"
+					-> steht für Methode, welche String zurückgibt, keine Parameter hat und actionName heißt 
+			* targets (zeigt auf eine Komponente in der Implementierung)
+				> wenn der Attributname action, actionListener, validator oder valueChangeListener ist und targets auf 
+				  ein Element in der Implementierung verweist, muss das Attribut nicht selbst an das Zielelement zugewiesen werden 
+				> method-signature muss man nicht selbst angeben
+				> JSF fügt das Attribut automatisch dem Zielelement zu
+					-> Voraussetzung: man darf das Attribut nicht selbst dem Zielelement zugewiesen haben 
+				> Beispiel: 
+					<cc:interface>
+						<!-- action Attribut entgegennehmen --> 
+						<cc:attribute name="action" required="true" targets="submit"></cc:attribute>
+					</cc:interface>
+					
+					<cc:implementation>
+						<div class="navbar-form navbar-right">
+							<h:form>
+								<!-- action wird wegen dem gesetzen targets automatisch dem commandButton zugewiesen -->
+								<h:commandButton id="submit" value="Login" styleClass="btn btn-default"/>
+							</h:form>
+						</div>
+					</cc:implementation>
+				-> Problem bei diesem Ansatz: es kann nur ein "action"-Attribut pro CC weitergeleitet werden (Lösung: siehe 27.5.1)
+					
+		27.1.2. cc:facet (definiet ein Facet für die Komponente)
+		- fügt ein benanntes Facet der Komponente hinzu (z.B. header, footer)
+		- Mögliche Attribute: 
+			* required 
+			
+		27.1.3. Verhaltensdefinitionen 
+		- Für JSF-Komponenten, welche man in seiner eigenen CC im Bereich cc:implementation verwendet können nach außen hin deren 
+          Verhaltensinterfaces (vgl. 3. JSF-Tag Lib) bekanntgeben werden 
+		- Durch die entsprechenden Tags der Interfaces in cc:interface und den Verweis auf die Komponenten kann der Benutzer der CC 
+		  dafür Event-Listener, Konverter und Validatoren registrieren
+		- Mögliche Tags in cc:interface
+			* cc:actionSource
+			* cc:valueHolder 
+			* cc:editableValueHolder
+		- mit diesen Tags kann man intern in cc:implementation verwendete JSF-Komponenten unter einem gemeinsamen Namen zusammenfassen und für den 
+		  Benutzer der CC verfügbar machen 
+			-> daher muss bei der Definition angegeben werden
+				a.) das Attribut "name" (diesen gibt der Benutzer der CC später im for-Attribut von Event-Listenern, Convertern und Validatoren an)
+					<cc:editableValueHolder name="input" ...
+				b.) das Attribut targets, welches die IDs der intern verwendeten Komponenten entgegennimmt  
+				<cc:editableValueHolder name="input" targets="username password"/>
+			-> steht in targets nur eine ID und ist diese ID gleich dem Namen des Verhaltensdefinitionstags so kann targets weggelassen werden 
+				<cc:actionSource name="submit"/> (wäre gleich <cc:actionSource name="submit" target="submit"/>)
+		- Der Benutzer kann nach der Definition für die internen Komponenten Event-Listener, Converter und Validatoren definieren 
+			<nb:loginForm>
+				<f:validateLongRange for="input"/>
+			</nb:loginForm>
+			
+	27.2. Mögliche Tags für cc:implementation
+	- cc:implementation enthält alle JSF- und HTML-Tags aus denen eine Komponente aufgebaut ist 
+	- Wichtige Möglichkeiten  
+		* cc:insertChildren: fügt Content ein, der zwischen den Komponenten-Tags beim Aufruf steht 
+			<nb:loginForm>
+				<p>Ich werde von cc:insertChildren eingefügt</p>
+			</nb:loginForm>
+		* das implizite EL-Objekt "cc" referenziert die aktuelle CC und ermöglicht Zugriff auf die vom Benutzer der CC übermittelten Attribute
+		
+	27.3. Resourcen in einer CC 
+	- Resourcen der Komponeten (CSS, JS) werden mit den gewohnten Tags in cc:implementation eingebunden 
+		<cc:implementation>
+			<h:outputScript ...
+			<h:outputStyle ...
+		</cc:implementation>
+		
+	27.4. Mögliche Einsatzbereiche von CC 
+	- dataTable: eine Komponente die nur als Wrapper einer JSF-dataTable-Komponente fungiert 
+	- collapsePanel: Ein- und Ausklappen eines Bereichs über eine Schaltfläche
+	- Spinner in einerm Inputfeld 
+	
+	27.5. Probleme und deren Behandlung bei CC 
+	
+		27.5.1. Mehrfache Action-Attribute 
+		- wie in 27.1.1. gesehen können action, actionListener, validator und valueChangeListener über das Attribut targets mit einer internen 
+		  Komponente verbunden werden 
+		- Problematisch ist dies jedoch wenn man mehr als ein action-Attribut vergeben will 
+		- Lösungen: 
+			a.) ab JSF 2.1. gibt es ein Zusatzattribut "targetAttributeName"
+				* damit kann das action-Attribut automatisch für mehrere Komponenten gesetzt werden 
+				* Beispiel: 
+					<cc:interface>
+						<cc:attribute name="submitAction" targets="submitButton" targetAttributeName="action"/>
+						<cc:attribute name="cancelAction" targets="cancelButton" targetAttributeName="action"/>
+					</cc:interface>
+					<cc:implementation>
+						<h:commandButton id="submitButton"/>
+						<h:commandButton id="cancelButton"/>
+					</cc:implementation>
+				-> somit kann man das Action-Attribut für mehrere Komponenten in einer CC setzen  
+			b.) man erstellt ein Attribut mit Methodensignatur und einem anderen actionNamen 
+	
+	
+28. Klassische Komponenten 
+- stößt man mit Composite-Components an die Grenzen kann man auch eine klassiche JSF-Komponete erstellen 
+
+	28.1. Komponentenfamilien, Komponetentyp und Rendertyp festlegen 
+	> Zunächst muss eine Basisklasse gewählt werden; es stehen zur Verfügung 
+		* UIComponent und UIComponentBase(Basisklassen aller Folgenden)
+		* UIOutput (Komponente für Ausgabe eines Wertes)
+		* UIInput (Komponete für Eingabe eines Wertes)
+		* UISelectOne (Komponete für Auswahl eines Wertes)
+		* UISelectMany (Komponete für Auswahl mehrerer Werte)
+		* UICommand (Komponete für Ausführen einer Action)
+		* UIPanel (Komponente die als Behälter dient)
+		* UIMessage (Komponente für Anzeige einer Nachricht)
+		-> meistens bieten sich an (da schon viel Basisfunktionalität vorhanden)
+			# UIInput (für alles was einen Wert im Modell betrifft und validiert werden muss etc.)
+			# UICommand (für alles was eine Action auslösen muss)
+	> Komponententyp setzen  
+		public static final String COMPONENT_TYPE = "com.github.beisser.ownComp"
+		-> dieser Typ wird verwendet: 
+			a.) um Komponente einer Tag-Lib hinzuzufügen 
+			b.) um Komponente zu erzeugen 
+				FacesContext.getCurrentInstance().getApplication().createComponent()
+	> Komponentenfamilie setzen 	
+		* Familie ergibt sich auch UIComponent.getFamily() 
+		* wenn man eigene Familie erstellen will muss man "getFamily" überschreiben
+	> Rendertyp festlegen 
+		* geschieht bei der Definition von Tags in Kombination mit der Angabe des Komponententyps
+		
+	28.2. Komponentenklasse schreiben 
+	- Herzstück der Komponente 
+		> enthält alle Daten 
+		> Steuerung der JSF-Ereignisse 
+	- die eigene Klasse hat pro Attribut der Komponente eine Eigenschaft 
+		> diese Eigenschaften werden in einer Map verwaltet 
+		> den Zustand einer Eigenschaft verwaltet der StateHelper 
+			-> der Statehelper muss auch beim Lesen und Schreiben UNBEDINGT verwendet werden (wegen Partial-Saving-Mechanismus von JSF)
+		> Beispiel: 
+		public class OwnComp extends UIInput{
+
+			public final static String CONTENT_TYPE = "com.github.beisser.OwnComp";
+
+			enum PropertyKeys{ownProp}
+
+			public OwnComp() {
+				setRendererType("com.github.beisser.OwnComp");
+			}
+
+			public int getOwnProp() {
+				return (Integer)getStateHelper().eval(
+					PropertyKeys.ownProp,1
+				);
+			}
+
+			public void setOwnProp(int ownProp) {
+				getStateHelper().put(PropertyKeys.ownProp,ownProp);
+			}
+			
+			/**
+			 * if user assigned a value expression to collapsed attribute the
+			 * current value has to be written back
+			 */
+			private void _setCollapsedValueExpression() {
+				ELContext elContext = FacesContext.getCurrentInstance().getELContext();
+				ValueExpression valueExpression = getValueExpression(PropertyKeys.ownProp.name());
+
+				if (valueExpression != null) {
+					valueExpression.setValue(elContext,getOwnProp());
+				}
+			}
+		}
+		
+	28.3. Renderklasse schreiben 
+	- WICHTIG: die Renderklasse ist optional! DAS RENDERING KANN EBENSO IN DER KOMPONENTENKLASSE GESCHEHEN 
+		-> auch in der Komponentenklasse gibt es die im folgenden erläuterten Methoden 
+		-> meist einfacher aber nicht so flexibel
+	- wichtigste Aufgaben: 
+		> Auslesen der notwendigen Request-Parameter (Decoding)
+		> Rendern der Komponente (Encoding)
+	- muss Klasse javax.faces.render.Renderer erweitern 
+	
+		28.1. Rendering 
+		- für das Rendern der Komponente muss die Methode encodeBegin der Klasse Renderer zu überschreiben 
+			@Override
+			public void encodeBegin(FacesContext context, UIComponent component) throws IOException {
+				OwnComp ownComp = (OwnComp)component;
+				ResponseWriter responseWriter = context.getResponseWriter();
+				String clientId = ownComp.getClientId();
+				
+				// hierüber bekommt man Zugriff auf Attribute der Komponente, die bei der Verwendung angegeben wurden 
+				Map<Object,Object> attrs = ownComp.getAttributes();
+				String styleClass = (String)attrs.get("styleClass");
+				
+				Object value = _getValue(context,ownComp);
+
+				responseWriter.startElement("input",ownComp);
+					responseWriter.writeAttribute("id",clientId,"id");			// ID MUSS IMMER GESETZT WERDEN!
+					responseWriter.writeAttribute("name",clientId,null);
+					responseWriter.writeAttribute("id",clientId,null);
+					if (value != null) {
+						responseWriter.writeAttribute("value",value.toString(),null);
+					}
+				responseWriter.endElement("input");
+			}
+			-> die Methode holt sich erst die Komponente und den ResponseWriter (der anschließend das Tag und dessen Attribute schreibt)
+			-> wichtig ist die Methode zum Holen des values "_getValue" (siehe gleich)
+	
+		- notwendige Hilfsmethoden sind 
+			a.)_getValue 
+			private Object _getValue(FacesContext context,OwnComp ownComp) {
+				Object submittedValue = ownComp.getSubmittedValue();
+				if (submittedValue != null) {
+					return submittedValue;
+				}
+				Object value = ownComp.getValue();
+				Converter converter = _getConverter(context,ownComp);
+				if (converter != null) {
+					return converter.getAsString(context,ownComp,value);
+				} else if (value != null) {
+					return value.toString();
+				} else {
+					return "";
+				}
+			}
+			-> die Methode schaut zuerst ob der submittedValue gesetzt ist 
+			-> ist das der Fall, weiß man dass die Validierung oder Konvertierung fehlgeschlagen ist (dann einfach den Wert zurückgeben)
+			-> wenn Value gesetzt ist, muss noch ein eventuell verfügbarer Converter aufgerufen werden 
+
+			b.) _getConverter
+			private Converter _getConverter(FacesContext context, UIComponent component) {
+				Converter converter = ((UIInput) component).getConverter();
+				if (converter != null) {
+					return converter;
+				}
+				ValueExpression exp = component.getValueExpression("value");
+				if (exp == null) {
+					return null;
+				}
+				Class valueType = exp.getType(context.getELContext());
+				if (valueType == null) {
+					return null;
+				}
+				return context.getApplication().createConverter(valueType);
+			}
+			-> die Methode gibt einen eventuell verfügbaren Converter zurück
+
+		28.2. Auslesen der Request-Parameter
+		- für das Auslesen der Request-Parameter der Komponente muss decode der Klasse Renderer überschrieben werden 
+			 @Override
+			public void decode(FacesContext context, UIComponent component) {
+				Map<String,String> params = context.getExternalContext().getRequestParameterMap();
+				String clientId = component.getClientId();
+				String value = params.get(clientId);
+				((UIInput)component).setSubmittedValue(value);
+			}
+			-> die Methode holt sich alle Request-Parameter und holt sich den Eintrag für die Id der Komponente 
+			-> anschließend wird der ermittelte Wert als SubmittedValue gesetzt 
+			
+		28.3. Konvertieren und Validieren des Submitted Values 
+		- für das Konvertieren des Submitted Values muss getConvertedValue der Klasse Renderer überschrieben werden 
+			@Override
+			public Object getConvertedValue(FacesContext context, UIComponent component, Object submittedValue) throws ConverterException {
+				Converter converter = _getConverter(context,component);
+				if (converter != null) {
+					return converter.getAsObject(context,component,(String)submittedValue);
+				} else {
+					return submittedValue;
+				}
+			}
+			
+		28.4. Hinzufügen von Resourcen zur Komponente 
+		a.) Hinzufügen von JS und CSS
+			@ResourceDependencies({
+				@ResourceDependency(library = "libName",name ="style.css")
+			})
+			public class OwnCompRenderer extends Renderer{ 
+				// code here 
+			}
+		b.) Hinzufügen von Bildern (muss in encodeBegin selbst geschehen)
+		Application app = context.getApplication();
+        ResourceHandler handler = app.getResourceHandler();
+        Resource img = handler.createResource("imgName.jpg","libName");
+        String onClick = MessageFormat.format("return jsMethod {0}","param1");
+        responseWriter.startElement("img",ownComp);
+        responseWriter.writeAttribute("src",img.getRequestPath(),null);
+        responseWriter.writeAttribute("onClick",onClick,null);
+        responseWriter.endElement("img");
+		
+	28.4. Komponente registrieren 
+	- die Komponenten- und Renderklassen müssen registriert werden 
+		a.) über faces-config.xml 
+			* Komponente 
+				<component>
+					<component-type>com.github.beisser.OwnComp</component-type>
+					<component-class>com.github.beisser.components.OwnComp</component-class>
+				</component>
+			* Renderer 
+				<render-kit>
+					<render-kit-id>HTML_BASIC</render-kit-id>
+					<renderer>
+						<component-family>javax.faces.Input</component-family>
+						<renderer-type>com.github.beisser.OwnComp</renderer-type>
+						<renderer-class>com.github.beisser.components.OwnCompRenderer</renderer-class>
+					</renderer>
+				</render-kit>
+		b.) über Annotation 
+			* Komponente
+				@FacesComponent("com.github.beisser.OwnComp")
+				public class OwnComp extends UIInput{
+			* Renderer
+				@FacesRenderer(componentFamily = "javax.faces.Input",rendererType = "com.github.beisser.OwnCompRenderer")
+				public class OwnCompRenderer extends Renderer{
+				
+	28.5. Tag für Komponente registrieren 
+	- dazu benötigt man zunächst eine Tag-Lib (vgl. 26.2)
+	- dann einfach einen neuen Tag definieren 
+		<tag>
+			<tag-name>ownComp</tag-name>
+			<component>
+				<component-type>com.github.beisser.OwnComp</component-type>
+				
+				<!-- WICHTIG: Wenn Rendering innerhalb der KomponentenKlasse geschieht, braucht man keinen Renderer-Type angeben -->
+				<renderer-type>com.github.beisser.OwnCompRenderer</renderer-type>
+			</component>
+			
+			<!-- hier können noch Vorgaben / Informationen zu den verwendeten Attributen gemacht werden die auch von IDEs verwendet werden -->
+			<attribute>
+				<name>styleClass</name>
+				<description>The class of the component</description>
+				<type>java.lang.String</type>
+				<required>true</required>
+			</attribute>
+		</tag>
+		
+	28.6. Nur Renderer oder Komponentenklasse austauschen 
+	- natürlich kann auch nur eine Render- oder Komponentenklasse ausgetauscht werden 
+	
+	
+29. Kombination von Composite-Components und klassischen Komponenten 
+- immer gut wenn in CC Java-Code ausgeführt werden sollte 
+	> Java-Code wird dann in klassischer Komponente gekapselt 
+	> die klassische Komponente wird dann in eine CC integriert 
+- Dazu muss eine neue CC erstellt werden 
+	> wie in 27 (Composite-Components (CC)) dargestellt hat jede CC eine Wurzelkomponente (die ist defaultmäßig UINamingContainer)
+	> um Java-Code zu verwenden schreibt man nun eine eigene Wurzelkomponente 
+	> diese gibt man dann unter dem Attribut "componentType" des Tags cc:interface an 
+		<cc:interface componentType="com.github.beisser.gui.jsf.component.CollapsiblePanel">
+        
+		</cc:interface>
+	> WICHTIGE VORAUSSETZUNG: Die Klasse der Wurzelkomponente muss das Interface "NamingContainer" implementieren (und damit 
+	  in getFamily() javax.faces.NamingContainer zurückgeben)
+		-> leitet man von "UINamingContainer" ab ist das aber nicht notwendig 
+- Beispiel: 
+	> Beispiel für eine Wurzelkomponentenklasse, die es ermöglicht ein "collapsed"-Attribut anzugeben 
+		@FacesComponent("com.github.beisser.gui.jsf.component.CollapsiblePanel")
+		public class CollapsiblePanel extends UINamingContainer{
+
+			enum PropertyKeys{collapsed}
+
+			public Boolean isCollapsed() {
+				return (Boolean)getStateHelper().eval(
+						PropertyKeys.collapsed,false
+				);
+			}
+
+			public void setCollapsed(Boolean collapsed) {
+				getStateHelper().put(PropertyKeys.collapsed,collapsed);
+			}
+
+			public void toogle(ActionEvent e) {
+				setCollapsed(!isCollapsed());
+				_setCollapsedValueExpression();
+			}
+
+			/**
+			 * if user assigned a value expression to collapsed attribute the
+			 * current value has to be written back
+			 */
+			private void _setCollapsedValueExpression() {
+				ELContext elContext = FacesContext.getCurrentInstance().getELContext();
+				ValueExpression valueExpression = getValueExpression(PropertyKeys.collapsed.name());
+
+				if (valueExpression != null) {
+					valueExpression.setValue(elContext,isCollapsed());
+				}
+			}
+		}
+
+	> Auf die hier definierten Attribute und Methoden kann man in der CC über "cc.varName" zugreifen 
+		<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
+
+			<!-- component attributes -->
+			<cc:interface componentType="com.github.beisser.gui.jsf.component.CollapsiblePanel">
+				<cc:attribute name="collapsed"/>
+			</cc:interface>
+
+			<!-- component implementation -->
+			<cc:implementation>
+				<h:outputText value="#{cc.collapsed}"/>
+			</cc:implementation>
+		</ui:composition>
+	> Einbindung der Komponentenkombination wie in 27. Composite-Components (CC) geschildert
+		
+30. AJAX und JSF 
+- JSF bringt eine eigene Javascript-Bibliothek mit um mit AJAX arbeiten zu können 
+- Damit Komponenten mit AJAX-arbeiten können müssen sie "ClientBehaviorHolder" implementieren 
+	-> wenn man AJAX in eigenen Kompontenten zulassen möchte muss man dieses Interfaces also implementieren 
+- Interner Ablauf
+	> führt man eine Ajax-Anfrage aus werden 
+		a.) der JSF-Life-Cycle nur für die in "execute" angegeben Komponenten ausgeführt 
+			-> dabei wird der JSF-Life-Cycle von "Restore-View" bis zu "Invoke-Application" durchlaufen 
+		b.) nur die in "render" angegeben Kompontenten neu gerendert 
+			-> dabei wird lediglich "Render Response" vom JSF-Life-Cycle ausgeführt 
+- über FacesContext.getPartialViewContext().isAjaxRequest() kann man feststellen ob ein Request vom Typ "AJAX" ist 
+	z.B. in einem PhaseListener 
+- um mit AJAX zu arbeiten gibt es zwei Wege: 
+
+	30.1. f:ajax 
+	- Jede Komponente kann als Kind-Tag f:ajax bekommen und wird damit mit Ajax-Funktionalität ausgestattet
+	- Beispiel: 
+		<h:form id="form">
+                <h:selectBooleanCheckbox id="displayed" value="#{ajaxController.displayed}"
+                                         valueChangeListener="#{ajaxController.displayedChanged}">
+                    <f:ajax render="toReRender"/>
+                </h:selectBooleanCheckbox>
+            </h:form>
+
+            <h:panelGroup id="toReRender">
+                <h:outputText id="outbox" value="#{ajaxController.displayed}"></h:outputText>
+            </h:panelGroup>
+	- f:ajax kann jedoch nicht nur selbst Kindelement sein, sondern auch selbst Komponenten enthalten, um einen 
+	  ganzen Bereich mit AJAX-Funktionalität auszustatten 
+	    <h:form id="form2">
+			<f:ajax render="outbox2 outbox3" event="keyup">
+				<h:panelGrid columns="1">
+					<h:inputText id="firstName" value="#{ajaxController.firstName}"/>
+					<h:inputText id="lastName" value="#{ajaxController.lastName}"/>
+				</h:panelGrid>
+			</f:ajax>
+			<h:panelGrid columns="2">
+				<h:outputLabel for="outbox2" value="Firstname"/><h:outputText id="outbox2" value="#{ajaxController.firstName}"/>
+				<h:outputLabel for="outbox3" value="Lastname"/><h:outputText id="outbox3" value="#{ajaxController.lastName}"/>
+			</h:panelGrid>
+		</h:form>
+		-> alle Komponeten innerhalb von f:ajax werden mit AJAX-Funktionalität ausgestattet 
+	- WICHTIG: Verwendung von IDs
+		> JSF geht davon das die f:ajax übergebenen IDs relativ zum nächsthöheren Naming-Container sind 
+			<h:form id="form">
+				<f:ajax render="inner"/>
+				<h:outputText id="inner">
+			-> "inner" muss als innerhalb von "form" liegen 
+		> will man auf eine ID außerhalb des nächsthöheren Naming-Containers zugreifen muss ein ":" vor die ID	
+			-> dies bewirkt, dass die ID absolut vom Wurzelknoten aus angesprochen wird 
+	- Folgende Attribute sind dabei wichtig: 
+		
+		a.) render 
+		> z.B. render="toReRender": Sagt an welche Komponente(n) neu gerendert werden sollen 
+			-> nur für diese wird der JSF Life-Cycle durchlaufen 
+		> möglich sind: 
+			* @this (Default): Die das AJAX-Tag umschließende Komponente 
+			* @form: Das Formular in dem sich die Komponente befindet 
+			* @none: Keine Komponente 
+			* @all: alle Komponenten 
+			* Leerzeichen-getrennte Liste von IDs 
+		> wichtig dabei: Komponenten, die von AJAX neu gerendert werden sollen, müssen im anfänglichen DOM vorhanden sein 
+		
+		b.) event 
+		> durch was wird die Ajax-Anfrage ausgelöst; möglich sind: 
+			* valueChange: Default für Eingabekomponenten (ValueChangeListener-Methode wird ausgeführt wenn angegeben)
+			* action: Default für Befehlskomponenten (Action-Methode wird ausgeführt wenn angegeben)
+			* alle HTML-Ereignisse (ohne "on"-Präfix) vgl. z.B. "click" für HTML-Ereignis "onClick"
+		
+		c.) execute 
+		> welche Komponenten sollen durch die AJAX-Abfrage den JSF-Life-Cycle durchlaufen; möglich sind: 
+			* @this (Default): Die das AJAX-Tag umschließende Komponente 
+			* @form: Das Formular in dem sich die Komponente befindet 
+			* @none: Keine Komponente 
+			* @all: alle Komponenten 
+			* Leerzeichen-getrennte Liste von IDs 
+			
+		d.) listener 
+		> Möglichkeit eine Methode einer Managed Bean als Listener anzugeben 
+		> diese Methode muss so aussehen 
+			public void ajaxListener(AjaxBehaviorEvent e) {
+			
+			}
+			
+		e.) onevent 
+		> Callback-Funktion für Status der AJAX-Anfrage; bekommt data-Objekt übergeben 
+			var processEvent = function(data) {
+				
+			}
+			-> über data-Objekt kann man den Status abfragen (data.status); dieser kann sein: 
+				* begin
+				* complete 
+				* success
+			-> Funktion wird also 3-Mal pro AJAX-Anfrage aufgerufen 
+			-> es können beliebig viele Callback-Funktion der AJAX-Queue übergeben werden 
+			-> alle AJAX-Anfragen greifen dabei auf die gleiche AJAX-Queue zu d.h. die Callback-Funktionen werden 
+			   für alle AJAX-Anfragen herangezogen 
+		
+		f.) onerror 
+		> ermöglicht das Registrieren einer Javascript-Callback-Funktion im Fehlerfall 
+			var processError = function(data) {
+				
+			}
+			-> über data-Objekt kann man den Fehler abfragen (data.status); dieser kann sein: 
+				* httpError
+				* serverError
+				* malformedXml
+				* emptyResponse
+			-> Funktion wird im Fehler-Fall aufgerufen 
+			-> es können beliebig viele Callback-Funktion der AJAX-Queue übergeben werden 
+			-> alle AJAX-Anfragen greifen dabei auf die gleiche AJAX-Queue zu d.h. die Callback-Funktionen werden 
+			   für alle AJAX-Anfragen herangezogen 
+		
+		g.) disabled 
+		> AJAX-Verhalten ist abgeschaltet, wenn auf true gesetzt 
+		
+		h.) delay 
+		> AJAX-Anfrage wird verzögert abgefeuert (Perfekt für Tastaturereignisse)
+		> Angabe der Verzögerung in Millisekunden 
+		> erfolgen in dieser Zeit mehrere AJAX-Anfragen wird nur die aktuellste genommen 
+		
+		i.) resetValue 
+		> erlaubt das Zurücksetzen von Eingabefeldern 
+	
+			
+	30.2. Javascript-API 
+	- Eine Kompontente kann aber auch durch direkten Aufruf der JS-API mit AJAX ausgestattet werden 
+		-> WICHTIG: hierzu muss jedoch "jsf.js" manuell eingebunden werden 
+			<h:outputScript name="jsf.js" library="javax.faces" target="head"/>
+	- Beispiel: 
+		<h:selectBooleanCheckbox id="displayed" value="#{ajaxController.displayed}"
+			 valueChangeListener="#{ajaxController.displayedChanged}"
+			 onchange="jsf.ajax.request(
+					 this,
+					 event,
+					 {
+						 render:'form:outbox'
+					 }
+			 )"/>
+	- Wichtigste Funktionen der Javascript-API
+		> jsf.ajax.request(source,event,options): AJAX-Anfrage an Server senden 
+			* source: das Element das den JSF-Life-Cycle durchlaufen soll 
+			* event: das Event, welches die AJAX-Anfrage auslöst  
+			* options: Array mit Optionen z.B. execute,render 
+				-> wichtig: bei der Angabe von IDs in der Javascript-API muss immer die absolute ID von Komponenten angegeben werden 
+		> jsf.ajax.addOnError(callback): Callback-Funktion im Fehlerfall 
+			var processError = function(data) {
+				
+			}
+			-> über data-Objekt kann man den Fehler abfragen (data.status); dieser kann sein: 
+				* httpError
+				* serverError
+				* malformedXml
+				* emptyResponse
+			-> Funktion wird im Fehler-Fall aufgerufen 
+			-> kann über Key "onerror" in den "options" einer jsf.ajax.request()-Funktion abgelegt werden 
+			-> es können beliebig viele Callback-Funktion der AJAX-Queue übergeben werden 
+			-> alle AJAX-Anfragen greifen dabei auf die gleiche AJAX-Queue zu d.h. die Callback-Funktionen werden 
+			   für alle AJAX-Anfragen herangezogen 
+		> jsf.ajax.addOnEvent(callback): Callback-Funktion für Status der AJAX-Anfrage; bekommt data-Objekt übergeben 
+			var processEvent = function(data) {
+				
+			}
+			-> über data-Objekt kann man den Status abfragen (data.status); dieser kann sein: 
+				* begin
+				* complete 
+				* success
+			-> Funktion wird also 3-Mal pro AJAX-Anfrage aufgerufen 
+			-> kann über Key "onevent" in den "options" einer jsf.ajax.request()-Funktion abgelegt werden 
+			-> es können beliebig viele Callback-Funktion der AJAX-Queue übergeben werden 
+			-> alle AJAX-Anfragen greifen dabei auf die gleiche AJAX-Queue zu d.h. die Callback-Funktionen werden 
+			   für alle AJAX-Anfragen herangezogen 
+		
+	30.3. AJAX in Composite-Components
+	> auch in CCs kann man AJAX in der oben beschrieben Weise problemlos einsetzen durch: 
+		a.) f:ajax 
+		b.) Javascript-API
+	> Beispiel 1: Logger, welcher den Status von AJAX-Anfragen loggt mit Javascript-API
+		* CC: 
+			<!-- component attributes -->
+			<cc:interface>
+				<cc:attribute name="text" default="loading..."></cc:attribute>
+			</cc:interface>
+
+			<!-- component implementation -->
+			<cc:implementation>
+				<h:outputScript name="jsf.js" library="javax.faces" target="head"/>
+				<h:outputScript name="status/status.js" library="js" target="head"/>
+
+				<script type="text/javascript">
+					registerCallback('#{cc.clientId}:msg');
+				</script>
+
+				<div id="#{cc.clientId}:msg" style="display: none;">
+					#{cc.attrs.text}
+				</div>
+			</cc:implementation>
+			-> wichtig ist hier 
+				a.) das Einbeziehungen von der JSF-Javascript-API und eines eigenen Javascript-Files, welches die Funktionalität beinhaltet 
+				b.) der Aufruf der gleich folgenden Javascript-Funktion, die eine Callback-Funktion registriert 
+				c.) die ClientId unbedingt über die Eigenschaft "cc.clientId" der CC setzen, damit die von JSF gesetzte ID verwendet wird  
+		* JS-File 
+			function processAjaxUpdate(msgId) {
+				function processEvent (data) {
+					var msg = document.getElementById(msgId);
+					if (data.status == 'begin') {
+						console.log(msgId + ": AJAX hat begonnen");
+					} else if (data.status == 'success') {
+						console.log(msgId + " AJAX ist beendet");
+					}
+				}
+				return processEvent;
+			}
+
+			var registerCallback = function (msgId) {
+				jsf.ajax.addOnEvent(processAjaxUpdate(msgId));
+			}
+			-> bei der "processAjaxUpdate" werden zwei Methoden geschachtelt um der inneren weitere Parameter (hier msgId) übergeben zu können 
+			-> processAjaxUpdate gibt die eigentliche Callback zurück 
+			-> registerCallback dient als Einstiegspunkt und wird von der CC aufgerufen 
+			
+	> Beispiel 2
+		-> Eine AJAX-Abfrage kann auch im Javascript-Teil ausgelöst werden 
+			a.) dazu übergibt man wie im Beispiel 1 die ID der Komponente die man mit AJAX ausstatten will im <script>-Teil 
+			b.) in einer Jsavescript-Funktion holt man sich nun mit der übergeben ID das DOM-Element 
+			c.) dann feuert man einen AJAX-Request manuell 
+				    jsf.ajax.request(element,null,{
+						render : "toRender"
+					});
+				
+		
+31. Authentication im Glassfish-Container 
+- JavaEE-Container kann sich komplett um Authentication kümmern z.B. um 
+	* Basic
+	* Digest
+	* Form 
+
+	28.1. Basic-Auth 
+	- Zunächst im web-Verzeichnis einen Unterordner anlegen, der alle JSF-Seiten beinhaltet, die über Basic-Auth geschützt werden sollen 
+	- dann im web.xml folgende security-Einstellungen vornehmen 
+		<security-constraint>
+			<web-resource-collection>
+				<web-resource-name>admin</web-resource-name>
+				<!-- Path to the protected area -->
+				<url-pattern>/basic/*</url-pattern>
+			</web-resource-collection>
+			<auth-constraint>
+				<!-- which roles should have access to the restricted area -->
+				<role-name>admin</role-name>
+			</auth-constraint>
+		</security-constraint>
+		<login-config>
+			<!-- auth type -->
+			<auth-method>BASIC</auth-method>
+			<!-- name of the realm; users with accepted role need to be added in glassfish admin console -->
+			<!-- server-config > Security > Realms > file --> 
+			<realm-name>file</realm-name>
+		</login-config>
+		<security-role>
+			<role-name>admin</role-name>
+		</security-role>
+	- dann im WEB-INF-Verzeichnis glassfish-web.xml anlegen und dort die Rolle auf eine Gruppe mappen 
+		<glassfish-web-app>
+			<security-role-mapping>
+				<role-name>admin</role-name>
+				<!-- the group name must be assigned to a user added to the realm in glassfish admin console -->
+				<group-name>admin</group-name>
+			</security-role-mapping>
+		</glassfish-web-app>
+	- dann in glassfish admin console unter server-config > Security > Realms > file 
+		* Benutzer hinzufügen 
+		* entsprechende Gruppen-Namen vergeben 
+		
+	
+			
+	

@@ -4,7 +4,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-      xmlns:f="http://xmlns.jcp.org/jsf/core">
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:nb="http://com.github/beisser">
 <f:view contracts="#{contract.contract}">
     <ui:composition template="/adminTemplate.xhtml">
         <ui:define name="header">
@@ -27,6 +28,7 @@
 
             <hr></hr>
             <h4>Ajax-Area</h4>
+            <nb:ajaxStatus/>
             <h:form id="form2">
                 <f:ajax render="outbox2 outbox3" event="keyup">
                     <h:panelGrid columns="1">
